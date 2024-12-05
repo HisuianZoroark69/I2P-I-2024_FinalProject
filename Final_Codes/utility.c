@@ -112,14 +112,19 @@ void print_log(const char * msg, va_list arg, logtype type){
                 fprintf(f, "[???] ");
             break;
     }
-    
+    //Cloning arg before using
+    va_list fArg;
+    va_copy(fArg, arg);
+
     vprintf(msg, arg);
     printf("\n");
+
     if(f != NULL){
-        vfprintf(f, msg, arg);
+        vfprintf(f, msg, fArg);
         fprintf(f, "\n");
         fclose(f);
     }
+    va_end(fArg);
 
 #endif
 }
