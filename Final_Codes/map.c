@@ -172,7 +172,11 @@ void destroy_map(Map * map){
     al_destroy_sample(map->coin_audio);
 }
 
-bool isWalkable(BLOCK_TYPE block){
+bool isWalkable(Map* map, Point p){
+    if(p.x < 0 || p.y < 0) return false;
+    if(p.x >= map->col || p.y >= map->row) return false;
+
+    BLOCK_TYPE block = map->map[p.y][p.x];
     if(block == FLOOR ||  block == COIN) return true;
     return false;
 }

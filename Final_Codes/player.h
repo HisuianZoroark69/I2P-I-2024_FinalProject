@@ -15,7 +15,7 @@ typedef enum {
 typedef struct _Player{
     Point coord; // coordinate of the player
     int speed; // TODO: CHANGE SPEED SCALED TO THE SIZE OF THE TILES
-    int direction;
+    double direction; //Radian
     int health;
     
     ALLEGRO_BITMAP* image;

@@ -28,8 +28,8 @@ bool update_bullet(Bullet * bullet, enemyNode * enemyList, Map * map){
         bullet->coord.x += bullet->speed * cos(bullet->angle);
         bullet->coord.y += bullet->speed * sin(bullet->angle);
     */
-    bullet->coord.x += 4;
-    bullet->coord.y += 0;
+    bullet->coord.x += bullet->speed * cos(bullet->angle);
+    bullet->coord.y += bullet->speed * sin(bullet->angle);
     
     /*
         [TODO Hackathon 2-3] 

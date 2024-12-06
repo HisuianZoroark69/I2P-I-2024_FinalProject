@@ -83,6 +83,8 @@ bool updateEnemy(Enemy * enemy, Map * map, Player * player){
             Configure the death animation tick for dying animation,
             Return true when the enemy is dead
         */ 
+        enemy->death_animation_tick = (enemy->death_animation_tick + 1);
+        if(enemy->death_animation_tick >= 64) return true;
     }
     
     if(enemy->status != ALIVE) return false;
@@ -118,7 +120,7 @@ bool updateEnemy(Enemy * enemy, Map * map, Player * player){
             Point delta = shortestPath(map, enemy->coord, player->coord);
         */
 
-        Point delta = (Point){ 0, 0 };
+        Point delta = shortestPath(map, enemy->coord, player->coord);
         Point next, prev = enemy->coord;
         
         if(delta.x > 0) enemy->dir = RIGHT;
@@ -340,7 +342,7 @@ static Point shortestPath(Map * map, Point enemy, Point player){
             if(next.x < 0 || next.y < 0) continue;
             if(next.x >= map->row || next.y >= map->col) continue;
             
-            if(isWalkable(map->map[next.x][next.y]) && !visit[next.x][next.y]){
+            if(isWalkable(map, next) && !visit[next.x][next.y]){
                 dir[next.x][next.y] = move[i];
                 visit[next.x][next.y] = true;
                 Queue[rear++] = next;
@@ -397,7 +399,7 @@ static bool bresenhamLine(Map * map, Point p0, Point p1){
     while (1) {
         int tile_x = p0.y / TILE_SIZE;
         int tile_y = p0.x / TILE_SIZE;
-        if(!isWalkable(map->map[tile_x][tile_y])) return true;
+        if(!isWalkable(map, (Point){tile_x, tile_y})) return true;
         
         if (p0.x == p1.x && p0.y == p1.y) break;
         e2 = 2 * err;

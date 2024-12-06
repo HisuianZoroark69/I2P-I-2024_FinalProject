@@ -5,6 +5,8 @@
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
 
+# define PI 3.14159265358979323846
+
 /*
      [LOG_ENABLE]
 
@@ -58,10 +60,11 @@ typedef void(*function_mouse)(int btn, int x, int y, int dz);
 
 // Direction enumeration
 typedef enum _DIRECTION {
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT
+    NONE  = 0,
+    UP    = 0b0001,
+    DOWN  = 0b0010,
+    LEFT  = 0b0100,
+    RIGHT = 0b1000,
 } DIRECTION;
 
 // Integer Point (x, y)

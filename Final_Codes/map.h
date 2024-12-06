@@ -63,6 +63,6 @@ void draw_map(Map * map, Point cam); // Draw the map
 void update_map(Map * map, Point player_coord, int * total_coins); // Update map : you might want add some parameter here
 void destroy_map(Map * map); // Destroy map
 
-bool isWalkable(BLOCK_TYPE block);
+bool isWalkable(Map* map, Point p);
 
 #endif /* map_h */
