@@ -35,19 +35,7 @@ void update_player(Player * player, Map* map){
     if(player->knockback_CD > 0){
 
         player->knockback_CD--;
-        int next_x = player->coord.x + player->speed * cos(player->knockback_angle);
-        int next_y = player->coord.y + player->speed * sin(player->knockback_angle);
-        Point next;
-        next = (Point){next_x, player->coord.y};
-
-        if(!isCollision(player, map)){
-            player->coord = next;
-        }
-
-        next = (Point){player->coord.x, next_y};
-        if(!isCollision(player, map)){
-            player->coord = next;
-        }
+        
     }
 
     /*
@@ -89,7 +77,6 @@ void update_player(Player * player, Map* map){
     */
     //Stop player moving in direction if not walkable
     double dirX = 0, dirY = 0; 
-    DIRECTION collisionDir = isCollision(player, map);
 
     if(keyState[ALLEGRO_KEY_W]) dirY -= 1;
     if(keyState[ALLEGRO_KEY_S]) dirY += 1;
@@ -98,14 +85,13 @@ void update_player(Player * player, Map* map){
 
     if(dirX || dirY){
         player->direction = atan2(dirY, dirX);
-        player->coord.x += player->speed * cos(player->direction);
-        player->coord.y += player->speed * sin(player->direction);
+        player->coord.x = round((float)player->coord.x + (float)player->speed * cos(player->direction));
+        player->coord.y = round((float)player->coord.y + (float)player->speed * sin(player->direction));
         //game_log("Player move with direction %d", (int)(player->direction * 180 / PI));
     }
-    if(!(collisionDir & UP)) dirY -= 1;
-    if(!(collisionDir & DOWN)) dirY += 1;
-    if(!(collisionDir & LEFT)) player->coord.x = round((float)original.x / (float)TILE_SIZE) * TILE_SIZE;;
-    if(!(collisionDir & RIGHT)) dirX ;
+    DIRECTION collisionDir = isCollision(player, map);
+    if (collisionDir & UP || collisionDir & DOWN) player->coord.y = original.y;
+    if (collisionDir & LEFT || collisionDir & RIGHT) player->coord.x = original.x;
 
     // if(isCollision(player, map)){
     //     player->coord.x = round((float)original.x / (float)TILE_SIZE) * TILE_SIZE;
@@ -158,22 +144,7 @@ static int isCollision(Player* player, Map* map){
         {player->coord.x / TILE_SIZE, (player->coord.y + TILE_SIZE - 1) / TILE_SIZE},                   //BL
         {(player->coord.x + TILE_SIZE - 1) / TILE_SIZE, (player->coord.y + TILE_SIZE - 1) / TILE_SIZE}  //BR
     };
-    //check out of bounds (Checked in isWalkable)
-    // if (corners[0].x < 0         ||
-    //     corners[0].y < 0         ||
-    //     corners[3].x >= map->col ||
-    //     corners[3].x >= map->row)
-    //     return NONE;
-
-    /*
-
-        [TODO HACKATHON 2-1]
-
-        Check every corner of enemy if it's collide or not
-
-        We check every corner if it's collide with the wall/hole or not
-        You can activate DRAW_HITBOX in utility.h to see how the collision work
-    */
+ 
     int ret = NONE;
     if(!isWalkable(map, corners[0]) && !isWalkable(map, corners[1])) ret ^= UP;
     if(!isWalkable(map, corners[2]) && !isWalkable(map, corners[3])) ret ^= DOWN;
@@ -196,11 +167,10 @@ void hitPlayer(Player * player, Point enemy_coord, int damage){
         */
 
         player->knockback_angle = angle;
-        player->knockback_CD = 32;
+        player->knockback_CD = 1;
 
-        player->health -= 10;
+        player->health -= 1;
         if(player->health <= 0){
-
             player->health = 0;
             player->status = PLAYER_DYING;
         }

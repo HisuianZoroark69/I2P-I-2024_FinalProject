@@ -20,6 +20,9 @@ BulletNode * bulletList; // Bullet List
 Weapon weapon; 
 int coins_obtained;
 
+Point Camera;
+const int CameraSoftBoundary = 64 * 5;
+
 static void init(void){
     
     initEnemy();
@@ -42,6 +45,17 @@ static void init(void){
     change_bgm("Assets/audio/game_bgm.mp3");
 }
 
+void UpdateCamera() {
+    if (player.coord.x < Camera.x + CameraSoftBoundary)
+        Camera.x = player.coord.x - CameraSoftBoundary;
+    if(player.coord.x + TILE_SIZE > Camera.x + SCREEN_W - CameraSoftBoundary)
+        Camera.x = player.coord.x - SCREEN_W + CameraSoftBoundary + TILE_SIZE;
+    if (player.coord.y < Camera.y + CameraSoftBoundary)
+        Camera.y = player.coord.y - CameraSoftBoundary;
+    if (player.coord.y + TILE_SIZE > Camera.y + SCREEN_H - CameraSoftBoundary)
+        Camera.y = player.coord.y - SCREEN_H + CameraSoftBoundary + TILE_SIZE;
+}
+
 static void update(void){
     /*
         [TODO Homework]
@@ -51,7 +65,6 @@ static void update(void){
 
     update_player(&player, &map);
 
-    Point Camera;
     /*
         [TODO HACKATHON 1-3]
         
@@ -61,8 +74,7 @@ static void update(void){
 
         Hint: Adjust it based on player position variable, then subtract it with half of the gameplay screen
     */
-    Camera = (Point){ 0, 0 };
-
+    UpdateCamera();
     updateEnemyList(enemyList, &map, &player);
     update_weapon(&weapon, bulletList, player.coord, Camera);
     updateBulletList(bulletList, enemyList, &map);
@@ -71,7 +83,6 @@ static void update(void){
 }
 
 static void draw(void){
-    Point Camera;
     /*
         [TODO HACKATHON 1-4]
         
@@ -81,7 +92,6 @@ static void draw(void){
 
         Hint: Just copy from the [TODO HACKATHON 1-3]
     */
-    Camera = (Point){ 0, 0 };
     
     // Draw
     draw_map(&map, Camera);
