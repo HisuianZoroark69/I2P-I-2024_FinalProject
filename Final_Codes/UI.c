@@ -32,7 +32,7 @@ Button button_create(int x, int y, int w, int h, const char* default_image_path,
 	return button;
 }
 
-void draw_button(Button button) {
+void draw_button(Button button, const char* text) {
 	ALLEGRO_BITMAP* _img = button.hovered ? button.hovered_img : button.default_img;
 	al_draw_scaled_bitmap(
 		_img,
@@ -40,6 +40,22 @@ void draw_button(Button button) {
 		al_get_bitmap_width(_img), al_get_bitmap_height(_img),
 		button.x, button.y,
 		button.w, button.h, 0
+	);
+	al_draw_text(
+		P2_FONT,
+		al_map_rgb(66, 76, 110),
+		button.x + button.w / 2,
+		button.y + 28 + button.hovered * 11,
+		ALLEGRO_ALIGN_CENTER,
+		text
+	);
+	al_draw_text(
+		P2_FONT,
+		al_map_rgb(225, 225, 225),
+		button.x + button.w/2,
+		button.y + 31 + button.hovered * 11,
+		ALLEGRO_ALIGN_CENTER,
+		text
 	);
 }
 
@@ -52,6 +68,7 @@ void update_button(Button* button) {
 		Using function you completed before,
 		determine the button if it's hovered or not (button->hovered)
 	*/
+	button->hovered = mouse_in_rect(mouse, rect);
 }
 
 void destroy_button(Button* button) {
@@ -65,6 +82,5 @@ static bool mouse_in_rect(Point mouse, RecArea rect) {
 		
 		Return true if mouse is inside the rectangle
 	*/
-
-	return false;
+	return (rect.x <= mouse.x && mouse.x <= rect.x + rect.w) && (rect.y <= mouse.y && mouse.y <= rect.y + rect.h);
 }

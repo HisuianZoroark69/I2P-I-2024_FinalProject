@@ -15,7 +15,7 @@ typedef struct _Button {
 }Button;
 
 Button button_create(int x, int y, int w, int h, const char* default_image_path, const char* hovered_image_path);
-void draw_button(Button button);
+void draw_button(Button button, const char* text);
 void update_button(Button* button);
 void destroy_button(Button* button);
 

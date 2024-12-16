@@ -9,17 +9,22 @@
 #include "game.h"
 
 static Button settingButton;
+static Button startButton;
 
 static void init(void) {
     settingButton = button_create(SCREEN_W / 2 - 200, 600, 400, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
-
+    startButton = button_create(SCREEN_W / 2 - 200 , 450, 400, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
     change_bgm("Assets/audio/menu_bgm.mp3");
 }
 
 static void update(void) {
     update_button(&settingButton);
-    if (keyState[ALLEGRO_KEY_ENTER]) {
-        change_scene(create_loading_scene());
+    update_button(&startButton); 
+    if (settingButton.hovered && mouseState.buttons) {
+        change_scene(create_setting_scene());
+    }
+    if (startButton.hovered && mouseState.buttons) {
+        change_scene(create_game_scene());
     }
 
     /*
@@ -37,7 +42,7 @@ static void draw(void) {
         SCREEN_W / 2,
         225,
         ALLEGRO_ALIGN_CENTER,
-        "NTHU-RPG ADVENTURE"
+        "Tales Saga Chronicles 3"
     );
     al_draw_text(
         TITLE_FONT,
@@ -45,37 +50,13 @@ static void draw(void) {
         SCREEN_W / 2,
         220,
         ALLEGRO_ALIGN_CENTER,
-        "NTHU-RPG ADVENTURE"
+        "Tales Saga Chronicles 3"
     );
 
-    al_draw_text(
-        P2_FONT,
-        al_map_rgb(255, 255, 255),
-        SCREEN_W / 2,
-        500,
-        ALLEGRO_ALIGN_CENTER,
-        "PRESS [ENTER] TO PLAY"
-    );
-
+    draw_button(startButton, "START");
     // button
-    draw_button(settingButton);
+    draw_button(settingButton, "SETTING");
     // button text
-    al_draw_text(
-        P2_FONT,
-        al_map_rgb(66, 76, 110),
-        SCREEN_W / 2,
-        600 + 28 + settingButton.hovered * 11,
-        ALLEGRO_ALIGN_CENTER,
-        "SETTING"
-    );
-    al_draw_text(
-        P2_FONT,
-        al_map_rgb(225, 225, 225),
-        SCREEN_W / 2,
-        600 + 31 + settingButton.hovered * 11,
-        ALLEGRO_ALIGN_CENTER,
-        "SETTING"
-    );
 }
 
 static void destroy(void) {

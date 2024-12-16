@@ -23,24 +23,8 @@ static void update(void) {
 
 static void draw(void) {
     // button
-    draw_button(backButton);
-    //button text
-    al_draw_text(
-        P2_FONT,
-        al_map_rgb(66, 76, 110),
-        SCREEN_W / 2,
-        650 + 28 + backButton.hovered * 11,
-        ALLEGRO_ALIGN_CENTER,
-        "BACK"
-    );
-    al_draw_text(
-        P2_FONT,
-        al_map_rgb(225, 225, 225),
-        SCREEN_W / 2,
-        650 + 31 + backButton.hovered * 11,
-        ALLEGRO_ALIGN_CENTER,
-        "BACK"
-    );
+    draw_button(backButton, "BACK");
+    //button tex4
 }
 
 static void destroy(void) {
