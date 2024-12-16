@@ -4,8 +4,10 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_font.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <math.h>
 #include "utility.h"
 
 const int FPS = 60; 
@@ -25,6 +27,8 @@ ALLEGRO_FONT* TITLE_FONT;
 ALLEGRO_FONT* P1_FONT;
 ALLEGRO_FONT* P2_FONT;
 ALLEGRO_FONT* P3_FONT;
+
+pcg32_random_t rng;
 
 void change_bgm(char* audio_path) {
     if (BGM) {
@@ -147,6 +151,36 @@ void game_abort(const char * msg, ...){
 #endif
     // Abort the game if there is an error
     exit(1);
+}
+
+double number_map(double inStart, double inEnd, double outStart, double outEnd, double value) {
+    if (value < inStart) return outStart;
+    if (value > inEnd) return outEnd;
+    double slope = 1.0 * (outEnd - outStart) / (inEnd - inStart);
+    return outStart + floor(slope * (value - inStart) + 0.5);
+}
+
+// *Really* minimal PCG32 code / (c) 2014 M.E. O'Neill / pcg-random.org
+// Licensed under Apache License 2.0 (NO WARRANTY, etc. see website)
+
+uint32_t pcg32_random_r(pcg32_random_t* rng)
+{
+    uint64_t oldstate = rng->state;
+    // Advance internal state
+    rng->state = oldstate * 6364136223846793005ULL + (rng->inc | 1);
+    // Calculate output function (XSH RR), uses old state for max ILP
+    uint32_t xorshifted = ((oldstate >> 18u) ^ oldstate) >> 27u;
+    uint32_t rot = oldstate >> 59u;
+    return (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
+}
+
+void RandomInit() {
+    rng.state = rand();
+    rng.inc = rand();
+}
+
+int RandNum(int start, int end) {
+    return pcg32_random_r(&rng) % (end - start + 1) + start;
 }
 
 // To print with a Warning Sign

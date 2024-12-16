@@ -106,6 +106,8 @@ void initGame(void){
     al_start_timer(gameTimer);
     al_start_timer(gameTick);
 
+    
+
     // Create the current scene
     change_scene(create_menu_scene());
     game_log("Scene %s created, initializing ... ", current_scene.name);
@@ -169,7 +171,9 @@ void start_loop(void){
         if(redraw && al_is_event_queue_empty(event_queue))
         {
             // Clear the template
-            al_clear_to_color(al_map_rgb(0, 0, 0));
+            //Set up blender
+            al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_INVERSE_ALPHA);
+            al_clear_to_color(al_map_rgba(0, 0, 0, 0));
             
             // Update
             current_scene.update();

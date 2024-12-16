@@ -17,7 +17,7 @@ Player create_player(char * path, int row, int col){
     };
 
     player.speed = 4;
-    player.health = 50;
+    player.health = 15;
 
     player.image = al_load_bitmap(path);
     if(!player.image){
@@ -30,6 +30,19 @@ Player create_player(char * path, int row, int col){
 void update_player(Player * player, Map* map){
 
     Point original = player->coord;
+
+    if (player->status == PLAYER_DYING) {
+        player->animation_tick--;
+        if (player->animation_tick == 0) {
+            return 1;
+        }
+        return 0;
+    }
+    if (player->health <= 0) {
+        player->health = 0;
+        player->status = PLAYER_DYING;
+        player->animation_tick = 60;
+    }
 
     // Knockback effect
     if(player->knockback_CD > 0){
@@ -87,7 +100,6 @@ void update_player(Player * player, Map* map){
         player->direction = atan2(dirY, dirX);
         player->coord.x = round((float)player->coord.x + (float)player->speed * cos(player->direction));
         player->coord.y = round((float)player->coord.y + (float)player->speed * sin(player->direction));
-        //game_log("Player move with direction %d", (int)(player->direction * 180 / PI));
     }
     DIRECTION collisionDir = isCollision(player, map);
     if (collisionDir & UP || collisionDir & DOWN) player->coord.y = original.y;
@@ -103,6 +115,7 @@ void update_player(Player * player, Map* map){
         Calculate the animation tick to draw animation later
     */
     player->animation_tick = (player->animation_tick + 1) % 64;
+    return 0;
 }
 
 void draw_player(Player * player, Point cam){
@@ -170,9 +183,5 @@ void hitPlayer(Player * player, Point enemy_coord, int damage){
         player->knockback_CD = 1;
 
         player->health -= 1;
-        if(player->health <= 0){
-            player->health = 0;
-            player->status = PLAYER_DYING;
-        }
     }
 }

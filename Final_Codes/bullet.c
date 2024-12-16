@@ -63,6 +63,11 @@ bool update_bullet(Bullet * bullet, enemyNode * enemyList, Map * map){
                 return true;
             }
         */
+        if (enemyCoord.x <= bullet->coord.x && bullet->coord.x <= enemyCoord.x + TILE_SIZE &&
+            enemyCoord.y <= bullet->coord.y && bullet->coord.y <= enemyCoord.y + TILE_SIZE) {
+            hitEnemy(&(cur->enemy), bullet->damage, bullet->angle);
+            return true;
+        }
 
         cur = cur->next;
     }
@@ -130,6 +135,9 @@ void drawBulletList(BulletNode * dummyhead, Point camera){
 }
 
 void destroyBulletList(BulletNode * dummyhead){
+    BulletNode* headDel = dummyhead;
+    dummyhead = dummyhead->next;
+    free(headDel);
     while(dummyhead != NULL){
         BulletNode * del = dummyhead;
         dummyhead = dummyhead->next;

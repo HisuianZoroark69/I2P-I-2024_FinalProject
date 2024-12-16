@@ -99,6 +99,8 @@ typedef struct Scene_{
     function_void destroy; // destroy scene
 } Scene;
 
+typedef struct { uint64_t state;  uint64_t inc; } pcg32_random_t;
+
 // Change Background Music
 void change_bgm(char* audio_path);
 
@@ -113,5 +115,9 @@ void game_log(const char * msg, ...);
 
 // Game Error Message: To Print something and then abort the game
 void game_abort(const char * msg, ...);
+
+double number_map(double inStart, double inEnd, double outStart, double outEnd, double value);
+
+int RandNum(int start, int end);
 
 #endif

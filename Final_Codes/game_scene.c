@@ -2,6 +2,7 @@
 #include "game_scene.h"
 #include "menu_scene.h"
 #include "loading_scene.h"
+#include "gameover_scene.h"
 #include "game.h"
 #include "player.h"
 #include "map.h"
@@ -34,7 +35,7 @@ static void init(void){
     enemyList = createEnemyList();
     bulletList = createBulletList();
 
-    weapon = create_weapon("Assets/guns.png", "Assets/yellow_bullet.png", 16, 8, 10);
+    weapon = create_weapon("Assets/guns.png", "Assets/yellow_bullet.png", 16, 8, 100);
     
     for(int i=0; i<map.EnemySpawnSize; i++){
         Enemy enemy = createEnemy(map.EnemySpawn[i].x, map.EnemySpawn[i].y, map.EnemyCode[i]);
@@ -100,6 +101,9 @@ static void draw(void){
     draw_player(&player, Camera);
     draw_weapon(&weapon, player.coord, Camera);
 
+    if (player.status == PLAYER_DYING && player.animation_tick <= 0) {
+        change_scene(create_gameover_scene(al_get_backbuffer(al_get_current_display())));
+    }
     /*
         [TODO Homework]
         

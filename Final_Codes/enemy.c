@@ -12,6 +12,8 @@
  */
 
 ALLEGRO_BITMAP * slimeBitmap;
+int MaxEnemySpawnCD = 60;
+int EnemySpawnCD = 60;
 
 // To check if p0 sprite and p1 sprite can go directly
 static bool validLine(Map* map, Point p0, Point p1);
@@ -84,10 +86,9 @@ bool updateEnemy(Enemy * enemy, Map * map, Player * player){
             Return true when the enemy is dead
         */ 
         enemy->death_animation_tick = (enemy->death_animation_tick + 1);
-        if(enemy->death_animation_tick >= 64) return true;
+        if(enemy->death_animation_tick >= 8) return true;
+        return false;
     }
-    
-    if(enemy->status != ALIVE) return false;
     
     enemy->animation_tick = (enemy->animation_tick + 1) % 64;
 
@@ -182,6 +183,11 @@ void drawEnemy(Enemy * enemy, Point cam){
 
             Draw Dying Animation for enemy
         */
+        int offset = 16 * (int)(enemy->death_animation_tick);
+        int flag = enemy->dir == RIGHT ? 1 : 0;
+        al_draw_tinted_scaled_rotated_bitmap_region(enemy->image, offset, 16, 16, 16, al_map_rgb(255, 255, 255),
+            0, 0, dx, dy, TILE_SIZE / 16, TILE_SIZE / 16,
+            0, flag);
     }
     
 #ifdef DRAW_HITBOX
@@ -212,6 +218,11 @@ void hitEnemy(Enemy * enemy, int damage, float angle){
             enemy->status = DYING;
         }
     */
+    enemy->health -= damage;
+    if (enemy->health <= 0) {
+        enemy->health = 0;
+        enemy->status = DYING;
+    }
 
     enemy->knockback_angle = angle;
     enemy->knockback_CD = 16;
@@ -243,6 +254,17 @@ void insertEnemyList(enemyNode * dummyhead, Enemy _enemy){
 void updateEnemyList(enemyNode * dummyhead, Map * map, Player * player){
     enemyNode * cur = dummyhead->next;
     enemyNode * prev = dummyhead;
+
+    EnemySpawnCD--;
+    if (EnemySpawnCD <= 0) {
+        EnemySpawnCD = MaxEnemySpawnCD;
+        int nx, ny;
+        do {
+            nx = RandNum(0, map->col);
+            ny = RandNum(0, map->row);
+        } while (!isWalkable(map, (Point) { nx, ny }));
+        insertEnemyList(dummyhead, createEnemy(nx, ny, slime));
+    }
     
     while(cur != NULL){
         bool shouldDelete = updateEnemy(&cur->enemy, map, player);
