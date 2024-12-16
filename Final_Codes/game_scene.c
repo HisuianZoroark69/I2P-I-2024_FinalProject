@@ -24,6 +24,8 @@ int coins_obtained;
 Point Camera;
 const int CameraSoftBoundary = 64 * 5;
 
+ALLEGRO_BITMAP* healthImg;
+
 static void init(void){
     
     initEnemy();
@@ -43,6 +45,7 @@ static void init(void){
     }
 
     game_log("coord x:%d \n coords y:%d \n", map.Spawn.x, map.Spawn.y);
+    healthImg = al_load_bitmap("Assets/heart.png");
     change_bgm("Assets/audio/game_bgm.mp3");
 }
 
@@ -83,6 +86,18 @@ static void update(void){
     
 }
 
+void drawHP() {
+    if (player.health > 5) {
+        al_draw_bitmap(healthImg, 0, 0, 0);
+        al_draw_textf(P3_FONT, al_map_rgb(255, 255, 255), al_get_bitmap_width(healthImg) + 2, 2, 0, "x%d", player.health);
+    }
+    else {
+        for (int i = 0; i < player.health; i++) {
+            al_draw_bitmap(healthImg, i * al_get_bitmap_width(healthImg), 0, 0);
+        }
+    }
+}
+
 static void draw(void){
     /*
         [TODO HACKATHON 1-4]
@@ -109,6 +124,7 @@ static void draw(void){
         
         Draw the UI of Health and Total Coins
     */
+    drawHP();
 }
 
 static void destroy(void){
