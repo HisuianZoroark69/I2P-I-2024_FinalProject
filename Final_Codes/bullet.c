@@ -47,22 +47,6 @@ bool update_bullet(Bullet * bullet, enemyNode * enemyList, Map * map){
     enemyNode * cur = enemyList->next;
     while(cur != NULL){
         Point enemyCoord = cur->enemy.coord;
-
-        /*
-            [TODO Hackathon 3-2] Hit the enemy
-            
-            Return true if the bullet hit the enemy so we can erase the bullet
-
-            In here, we iterate list of enemies until we hit one of them
-
-            Hint: The enemy coordinate is defined at enemyCoord variable,
-            while their width & height are equal to TILE_SIZE
-
-            if(...){
-                hitEnemy(...);
-                return true;
-            }
-        */
         if (enemyCoord.x <= bullet->coord.x && bullet->coord.x <= enemyCoord.x + TILE_SIZE &&
             enemyCoord.y <= bullet->coord.y && bullet->coord.y <= enemyCoord.y + TILE_SIZE) {
             hitEnemy(&(cur->enemy), bullet->damage, bullet->angle);

@@ -9,7 +9,7 @@
 #include "map.h"
 
 typedef enum {
-    PLAYER_IDLE, PLAYER_WALKING, PLAYER_DYING
+    PLAYER_IDLE, PLAYER_WALKING, PLAYER_DYING, PLAYER_ROOMBA
 } PLAYER_STATUS;
 
 typedef struct _Player{
@@ -28,10 +28,11 @@ typedef struct _Player{
 
 } Player;
 
-Player create_player(char * path,int row,int col);
+Player create_player(char * path, int frameSize,int row, int col);
 void update_player(Player * player, Map * map);
 void draw_player(Player * player, Point cam);
 void delete_player(Player * player);
+void change_form(Player* player, PLAYER_STATUS status);
 void hitPlayer(Player * player, Point enemy_coord, int damage);
 
 #endif /* player_h */

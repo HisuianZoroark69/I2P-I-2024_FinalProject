@@ -97,9 +97,10 @@ bool updateEnemy(Enemy * enemy, Map * map, Player * player){
         enemy->animation_hit_tick--;
     }
     
+    //Only handle knockbacks, no damage calculation
     if(enemy->knockback_CD > 0){
         enemy->knockback_CD--;
-        int next_x = enemy->coord.x + 4  * cos(enemy->knockback_angle);
+        int next_x = enemy->coord.x + 4 * cos(enemy->knockback_angle);
         int next_y = enemy->coord.y + 4 * sin(enemy->knockback_angle);
         Point next;
         next = (Point){next_x, enemy->coord.y};
@@ -206,24 +207,16 @@ void terminateEnemy(void) {
     al_destroy_bitmap(slimeBitmap);
 }
 
-void hitEnemy(Enemy * enemy, int damage, float angle){
-
-    /*  
-        [TODO Homework]
-
-        Decrease the enemy health with damage, if the health < 0, then set the status to DYING
-    
-        enemy->health = ...
-        if(...){
-            enemy->status = DYING;
-        }
-    */
+void hitEnemyNoKnockback(Enemy* enemy, int damage) {
     enemy->health -= damage;
     if (enemy->health <= 0) {
         enemy->health = 0;
         enemy->status = DYING;
     }
+}
 
+void hitEnemy(Enemy * enemy, int damage, float angle){
+    hitEnemyNoKnockback(enemy, damage);
     enemy->knockback_angle = angle;
     enemy->knockback_CD = 16;
 }

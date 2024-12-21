@@ -32,7 +32,7 @@ static void init(void){
     
     map = create_map("Assets/map0.txt", 0);
 
-    player = create_player("Assets/panda2.png", map.Spawn.x, map.Spawn.y);
+    player = create_player("Assets/arisu.png", 64, map.Spawn.x, map.Spawn.y);
 
     enemyList = createEnemyList();
     bulletList = createBulletList();
@@ -80,7 +80,9 @@ static void update(void){
     */
     UpdateCamera();
     updateEnemyList(enemyList, &map, &player);
-    update_weapon(&weapon, bulletList, player.coord, Camera);
+    if (player.status != PLAYER_ROOMBA) {
+        update_weapon(&weapon, bulletList, player.coord, Camera);
+    }
     updateBulletList(bulletList, enemyList, &map);
     update_map(&map, player.coord, &coins_obtained);
     
@@ -114,7 +116,10 @@ static void draw(void){
     drawEnemyList(enemyList, Camera);
     drawBulletList(bulletList, Camera);
     draw_player(&player, Camera);
-    draw_weapon(&weapon, player.coord, Camera);
+
+    if (player.status != PLAYER_ROOMBA) {
+        draw_weapon(&weapon, player.coord, Camera);
+    }
 
     if (player.status == PLAYER_DYING && player.animation_tick <= 0) {
         change_scene(create_gameover_scene(al_get_backbuffer(al_get_current_display())));

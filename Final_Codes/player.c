@@ -6,11 +6,12 @@
 #include <math.h>
 
 static int isCollision(Player* player, Map* map);
+int PlayerFrameSize;
 
-Player create_player(char * path, int row, int col){
+Player create_player(char * path, int frameSize, int row, int col){
     Player player;
     memset(&player, 0, sizeof(player));
-
+    PlayerFrameSize = frameSize;
     player.coord = (Point){
         col * TILE_SIZE,
         row * TILE_SIZE
@@ -51,43 +52,6 @@ void update_player(Player * player, Map* map){
         
     }
 
-    /*
-        [TODO HACKATHON 1-1]
-
-        Player Movement
-        Adjust the movement by player->speed
-
-        if (keyState[ALLEGRO_KEY_W]) {
-            player->coord.y = ...
-            player->direction = ...
-        }
-        if (keyState[ALLEGRO_KEY_S]) {
-            player->coord.y = ...
-            player->direction = ...
-        }
-    */
-
-    // if Collide, snap to the grid to make it pixel perfect
-    // if(isCollision(player, map)){
-    //     player->coord.y = round((float)original.y / (float)TILE_SIZE) * TILE_SIZE;
-    // }
-
-    /*
-        [TODO HACKATHON 1-2]
-
-        Player Movement
-        Add/Subtract the movement by player->speed
-
-        if (keyState[ALLEGRO_KEY_A]) {
-            player->coord.y = ...
-            player->direction = ...
-        }
-        if (keyState[ALLEGRO_KEY_D]) {
-            player->coord.y = ...
-            player->direction = ...
-
-    }
-    */
     //Stop player moving in direction if not walkable
     double dirX = 0, dirY = 0; 
 
@@ -105,16 +69,7 @@ void update_player(Player * player, Map* map){
     if (collisionDir & UP || collisionDir & DOWN) player->coord.y = original.y;
     if (collisionDir & LEFT || collisionDir & RIGHT) player->coord.x = original.x;
 
-    // if(isCollision(player, map)){
-    //     player->coord.x = round((float)original.x / (float)TILE_SIZE) * TILE_SIZE;
-    // }
-
-    /*
-        [TODO Homework]
-
-        Calculate the animation tick to draw animation later
-    */
-    player->animation_tick = (player->animation_tick + 1) % 64;
+    player->animation_tick = (player->animation_tick + 1) % 32;
     return 0;
 }
 
@@ -129,9 +84,9 @@ void draw_player(Player * player, Point cam){
 
         Draw Animation of Dying, Walking, and Idle
     */
-
+    int offset = PlayerFrameSize * (player->animation_tick / 4);
     al_draw_tinted_scaled_bitmap(player->image, al_map_rgb(255, 255, 255),
-        0, 0, 32, 32, // source image x, y, width, height
+        offset, 0, PlayerFrameSize, PlayerFrameSize, // source image x, y, width, height
         dx, dy, TILE_SIZE, TILE_SIZE, // destination x, y, width, height
         flag // Flip or not
     );
@@ -148,6 +103,11 @@ void draw_player(Player * player, Point cam){
 
 void delete_player(Player * player){
     al_destroy_bitmap(player->image);
+}
+
+void change_form(Player* player, PLAYER_STATUS status)
+{
+
 }
 
 static int isCollision(Player* player, Map* map){
