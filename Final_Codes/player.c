@@ -77,8 +77,9 @@ void draw_player(Player * player, Point cam){
     int dy = player->coord.y - cam.y; // destiny y axis
     int dx = player->coord.x - cam.x; // destiny x axis
 
-    int flag = 0; // Change the flag to flip character
-
+    if (-PI / 2 < player->direction && player->direction < PI / 2) player->flip = 0;
+    else if (player->direction == -PI / 2 || player->direction == PI / 2); //Dont change direction if going up or down
+    else player->flip = ALLEGRO_FLIP_HORIZONTAL;
     /*
         [TODO Homework]
 
@@ -88,7 +89,7 @@ void draw_player(Player * player, Point cam){
     al_draw_tinted_scaled_bitmap(player->image, al_map_rgb(255, 255, 255),
         offset, 0, PlayerFrameSize, PlayerFrameSize, // source image x, y, width, height
         dx, dy, TILE_SIZE, TILE_SIZE, // destination x, y, width, height
-        flag // Flip or not
+        player->flip // Flip or not
     );
 
 

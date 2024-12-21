@@ -25,7 +25,7 @@ typedef struct _Player{
     uint8_t knockback_CD;
 
     PLAYER_STATUS status;
-
+    int flip;
 } Player;
 
 Player create_player(char * path, int frameSize,int row, int col);
