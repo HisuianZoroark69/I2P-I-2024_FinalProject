@@ -9,7 +9,7 @@
 #include "map.h"
 
 typedef enum {
-    PLAYER_IDLE, PLAYER_WALKING, PLAYER_DYING, PLAYER_ROOMBA
+    PLAYER_IDLE, PLAYER_WALKING, PLAYER_SHOOTING, PLAYER_DYING, PLAYER_ROOMBA
 } PLAYER_STATUS;
 
 typedef struct _Player{
@@ -19,6 +19,7 @@ typedef struct _Player{
     int health;
     
     ALLEGRO_BITMAP* image;
+    ALLEGRO_BITMAP* death;
     uint8_t animation_tick; // For animation
     
     float knockback_angle;
@@ -28,11 +29,11 @@ typedef struct _Player{
     int flip;
 } Player;
 
-Player create_player(char * path, int frameSize,int row, int col);
+Player create_player(char * path, char* death,int frameSize, int row, int col);
 void update_player(Player * player, Map * map);
 void draw_player(Player * player, Point cam);
 void delete_player(Player * player);
-void change_form(Player* player, PLAYER_STATUS status);
+void change_status(Player* player, PLAYER_STATUS status);
 void hitPlayer(Player * player, Point enemy_coord, int damage);
 
 #endif /* player_h */

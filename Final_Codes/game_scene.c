@@ -32,7 +32,7 @@ static void init(void){
     
     map = create_map("Assets/map0.txt", 0);
 
-    player = create_player("Assets/arisu.png", 64, map.Spawn.x, map.Spawn.y);
+    player = create_player("Assets/arisu.png", "Assets/explode.png", 64, map.Spawn.x, map.Spawn.y);
 
     enemyList = createEnemyList();
     bulletList = createBulletList();
@@ -117,11 +117,11 @@ static void draw(void){
     drawBulletList(bulletList, Camera);
     draw_player(&player, Camera);
 
-    if (player.status != PLAYER_ROOMBA) {
+    if (player.status != PLAYER_ROOMBA && player.status != PLAYER_DYING) {
         draw_weapon(&weapon, player.coord, Camera);
     }
 
-    if (player.status == PLAYER_DYING && player.animation_tick <= 0) {
+    if (player.status == PLAYER_DYING && player.animation_tick >= 60) {
         change_scene(create_gameover_scene(al_get_backbuffer(al_get_current_display())));
     }
     /*

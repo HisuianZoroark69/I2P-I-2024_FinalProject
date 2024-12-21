@@ -8,7 +8,7 @@
 static int isCollision(Player* player, Map* map);
 int PlayerFrameSize;
 
-Player create_player(char * path, int frameSize, int row, int col){
+Player create_player(char * path, char* death, int frameSize, int row, int col){
     Player player;
     memset(&player, 0, sizeof(player));
     PlayerFrameSize = frameSize;
@@ -24,32 +24,39 @@ Player create_player(char * path, int frameSize, int row, int col){
     if(!player.image){
         game_abort("Error Load Bitmap with path : %s", path);
     }
+    player.death = al_load_bitmap(death);
+    if (!player.death) {
+        game_abort("Error Load Bitmap with path %s", death);
+    }
 
     return player;
 }
 
+void change_status(Player* player, PLAYER_STATUS status) {
+    if (player->status == status) return;
+    player->animation_tick = 0;
+    player->status = status;
+}
 void update_player(Player * player, Map* map){
 
     Point original = player->coord;
 
     if (player->status == PLAYER_DYING) {
-        player->animation_tick--;
-        if (player->animation_tick == 0) {
+        player->animation_tick++;
+        if (player->animation_tick == 59) {
             return 1;
         }
         return 0;
     }
     if (player->health <= 0) {
         player->health = 0;
-        player->status = PLAYER_DYING;
-        player->animation_tick = 60;
+        change_status(player, PLAYER_DYING);
+        return;
     }
 
-    // Knockback effect
+    // Knockback effect, now damage indicator
     if(player->knockback_CD > 0){
-
         player->knockback_CD--;
-        
     }
 
     //Stop player moving in direction if not walkable
@@ -65,33 +72,26 @@ void update_player(Player * player, Map* map){
         player->coord.x = round((float)player->coord.x + (float)player->speed * cos(player->direction));
         player->coord.y = round((float)player->coord.y + (float)player->speed * sin(player->direction));
     }
+    if (mouseState.buttons) {
+        change_status(player, PLAYER_SHOOTING);
+    }
+    else if(dirX || dirY){
+        change_status(player, PLAYER_WALKING);
+    }
+    else {
+        change_status(player, PLAYER_IDLE);
+    }
     DIRECTION collisionDir = isCollision(player, map);
     if (collisionDir & UP || collisionDir & DOWN) player->coord.y = original.y;
     if (collisionDir & LEFT || collisionDir & RIGHT) player->coord.x = original.x;
 
-    player->animation_tick = (player->animation_tick + 1) % 32;
+    player->animation_tick = (player->animation_tick + 1) % 60;
     return 0;
 }
 
 void draw_player(Player * player, Point cam){
     int dy = player->coord.y - cam.y; // destiny y axis
     int dx = player->coord.x - cam.x; // destiny x axis
-
-    if (-PI / 2 < player->direction && player->direction < PI / 2) player->flip = 0;
-    else if (player->direction == -PI / 2 || player->direction == PI / 2); //Dont change direction if going up or down
-    else player->flip = ALLEGRO_FLIP_HORIZONTAL;
-    /*
-        [TODO Homework]
-
-        Draw Animation of Dying, Walking, and Idle
-    */
-    int offset = PlayerFrameSize * (player->animation_tick / 4);
-    al_draw_tinted_scaled_bitmap(player->image, al_map_rgb(255, 255, 255),
-        offset, 0, PlayerFrameSize, PlayerFrameSize, // source image x, y, width, height
-        dx, dy, TILE_SIZE, TILE_SIZE, // destination x, y, width, height
-        player->flip // Flip or not
-    );
-
 
 #ifdef DRAW_HITBOX
     al_draw_rectangle(
@@ -100,16 +100,48 @@ void draw_player(Player * player, Point cam){
     );
 #endif
 
+    if (-PI / 2 < player->direction && player->direction < PI / 2) player->flip = 0;
+    else if (player->direction == -PI / 2 || player->direction == PI / 2); //Dont change direction if going up or down
+    else player->flip = ALLEGRO_FLIP_HORIZONTAL;
+
+    ALLEGRO_BITMAP* image;
+    if (player->status == PLAYER_DYING) image = player->death;
+    else image = player->image;
+
+    int xOffset = player->animation_tick;
+    if (player->status != PLAYER_DYING) {
+        xOffset %= 32;
+        xOffset /= 4;
+    }
+    if (player->status == PLAYER_WALKING) xOffset = 0;
+    xOffset *= PlayerFrameSize;
+
+    int yOffset;
+    switch (player->status) {
+    case PLAYER_DYING:
+    case PLAYER_IDLE: yOffset = 0; break;
+    case PLAYER_WALKING: yOffset = PlayerFrameSize; break;
+    case PLAYER_SHOOTING: yOffset = PlayerFrameSize * 2; break;
+    }
+
+    if (player->status == PLAYER_WALKING) {
+        if (player->animation_tick % 15 > 7) dy -= TILE_SIZE / 8;
+    }
+
+    al_draw_tinted_scaled_bitmap(image, al_map_rgb(255, 255, 255),
+        xOffset, yOffset, PlayerFrameSize, PlayerFrameSize, // source image x, y, width, height
+        dx, dy, TILE_SIZE, TILE_SIZE, // destination x, y, width, height
+        player->flip // Flip or not
+    );
+
+
+
 }
 
 void delete_player(Player * player){
     al_destroy_bitmap(player->image);
 }
 
-void change_form(Player* player, PLAYER_STATUS status)
-{
-
-}
 
 static int isCollision(Player* player, Map* map){
     Point corners[4] = {
@@ -133,12 +165,6 @@ void hitPlayer(Player * player, Point enemy_coord, int damage){
         float dY = player->coord.y - enemy_coord.y;
         float dX = player->coord.x - enemy_coord.x;
         float angle = atan2(dY, dX);
-
-        /*
-            [TODO Homework]
-
-            Game Logic when the player get hit or die
-        */
 
         player->knockback_angle = angle;
         player->knockback_CD = 1;
