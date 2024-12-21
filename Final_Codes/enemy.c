@@ -23,6 +23,7 @@ static bool bresenhamLine(Map * map, Point p0, Point p1);
 static Point shortestPath(Map * map, Point src, Point dst);
 // Calulate the movement speed to update and scaled it
 static Point findScaledDistance(Point p1, Point p2);
+static PointFloat findScaledDistanceF(Point p1, Point p2);
 // Return true if enemy have collision with unwalkable tiles in map
 static bool isCollision(Point enemyCoord, Map* map);
 // Return true if player collide with enemy
@@ -122,17 +123,18 @@ bool updateEnemy(Enemy * enemy, Map * map, Player * player){
             Point delta = shortestPath(map, enemy->coord, player->coord);
         */
 
-        Point delta = shortestPath(map, enemy->coord, player->coord);
+        //Point delta = shortestPath(map, enemy->coord, player->coord);
+        PointFloat delta = findScaledDistanceF(enemy->coord, player->coord);
         Point next, prev = enemy->coord;
         
         if(delta.x > 0) enemy->dir = RIGHT;
         if(delta.x < 0) enemy->dir = LEFT;
         
-        next = (Point){enemy->coord.x + delta.x * enemy->speed, enemy->coord.y};
+        next = (Point){round((float)enemy->coord.x + delta.x * (float)enemy->speed), enemy->coord.y};
         if(!isCollision(next, map))
             enemy->coord = next;
         
-        next = (Point){enemy->coord.x, enemy->coord.y + delta.y * enemy->speed};
+        next = (Point){enemy->coord.x, round((float)enemy->coord.y + delta.y * (float)enemy->speed)};
         if(!isCollision(next, map))
             enemy->coord = next;
         
@@ -147,6 +149,7 @@ bool updateEnemy(Enemy * enemy, Map * map, Player * player){
                 enemy->coord = next;
         }
         
+        //Draw enemy
         if (enemy->type == slime) {
             if (playerCollision(enemy->coord, player->coord) && enemy->animation_hit_tick == 0) {
                 enemy->animation_tick = 0;
@@ -448,6 +451,22 @@ static Point findScaledDistance(Point p1, Point p2) {
     return (Point){round(dxUnit), round(dyUnit)};
 }
 
+static PointFloat findScaledDistanceF(Point p1, Point p2) {
+    double dx = p2.x - p1.x;
+    double dy = p2.y - p1.y;
+
+    double d = sqrt(dx * dx + dy * dy);
+
+    // Floating error fix, when smaller than delta it will be immediately 0
+    if (d < 0.001) {
+        return (PointFloat) { 0, 0 };
+    }
+
+    double dxUnit = dx / d;
+    double dyUnit = dy / d;
+
+    return (PointFloat) { dxUnit, dyUnit};
+}
 
 static bool playerCollision(Point enemyCoord, Point playerCoord){
     // Rectangle & Rectanlge Collision
