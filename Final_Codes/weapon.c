@@ -52,7 +52,7 @@ void update_weapon(Weapon * weapon, BulletNode * bulletList, Point playerCoord, 
 void draw_weapon(Weapon * weapon, Point playerCoord, Point cam){
     int dy = playerCoord.y - cam.y + (TILE_SIZE/2) + 4; // destiny y axis
     int dx = playerCoord.x - cam.x + (TILE_SIZE / 2); // destiny x axis
-    float scale = TILE_SIZE / 32;
+    float scale = TILE_SIZE / 64;
     
     if(weapon->angle < M_PI_2){
         al_draw_scaled_rotated_bitmap( weapon->image, 11, 16, dx - TILE_SIZE / 8, dy,

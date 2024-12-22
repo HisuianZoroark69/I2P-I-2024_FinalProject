@@ -25,7 +25,7 @@ static Point shortestPath(Map * map, Point src, Point dst);
 static Point findScaledDistance(Point p1, Point p2);
 static PointFloat findScaledDistanceF(Point p1, Point p2);
 // Return true if enemy have collision with unwalkable tiles in map
-static bool isCollision(Point enemyCoord, Map* map);
+static bool isCollision(Point enemyCoord, Map* map, enemyNode* dummyhead);
 // Return true if player collide with enemy
 static bool playerCollision(Point enemyCoord, Point playerCoord);
 
@@ -77,9 +77,9 @@ Enemy createEnemy(int row, int col, char type){
 }
 
 // Return True if the enemy is dead
-bool updateEnemy(Enemy * enemy, Map * map, Player * player){
+bool updateEnemy(Enemy* enemy, enemyNode* dummyhead, Map* map, Player* player) {
     
-    if(enemy->status == DYING){
+    if (enemy->status == DYING) {
         /*
             [TODO Homework]
             
@@ -87,31 +87,31 @@ bool updateEnemy(Enemy * enemy, Map * map, Player * player){
             Return true when the enemy is dead
         */ 
         enemy->death_animation_tick = (enemy->death_animation_tick + 1);
-        if(enemy->death_animation_tick >= 8) return true;
+        if (enemy->death_animation_tick >= 8) return true;
         return false;
     }
     
     enemy->animation_tick = (enemy->animation_tick + 1) % 64;
 
-    if(enemy->animation_hit_tick > 0){
+    if (enemy->animation_hit_tick > 0) {
         enemy->animation_tick = (enemy->animation_tick + 1) % 64;
         enemy->animation_hit_tick--;
     }
     
     //Only handle knockbacks, no damage calculation
-    if(enemy->knockback_CD > 0){
+    if (enemy->knockback_CD > 0) {
         enemy->knockback_CD--;
         int next_x = enemy->coord.x + 4 * cos(enemy->knockback_angle);
         int next_y = enemy->coord.y + 4 * sin(enemy->knockback_angle);
         Point next;
-        next = (Point){next_x, enemy->coord.y};
+        next = (Point){ next_x, enemy->coord.y };
         
-        if(!isCollision(next, map)){
+        if (!isCollision(next, map, dummyhead)) {
             enemy->coord = next;
         }
         
-        next = (Point){enemy->coord.x, next_y};
-        if(!isCollision(next, map)){
+        next = (Point){ enemy->coord.x, next_y };
+        if (!isCollision(next, map, dummyhead)) {
             enemy->coord = next;
         }
     }
@@ -127,25 +127,25 @@ bool updateEnemy(Enemy * enemy, Map * map, Player * player){
         PointFloat delta = findScaledDistanceF(enemy->coord, player->coord);
         Point next, prev = enemy->coord;
         
-        if(delta.x > 0) enemy->dir = RIGHT;
-        if(delta.x < 0) enemy->dir = LEFT;
+        if (delta.x > 0) enemy->dir = RIGHT;
+        if (delta.x < 0) enemy->dir = LEFT;
         
-        next = (Point){round((float)enemy->coord.x + delta.x * (float)enemy->speed), enemy->coord.y};
-        if(!isCollision(next, map))
+        next = (Point){ round((float)enemy->coord.x + delta.x * (float)enemy->speed), enemy->coord.y };
+        if (!isCollision(next, map, dummyhead))
             enemy->coord = next;
         
-        next = (Point){enemy->coord.x, round((float)enemy->coord.y + delta.y * (float)enemy->speed)};
-        if(!isCollision(next, map))
+        next = (Point){ enemy->coord.x, round((float)enemy->coord.y + delta.y * (float)enemy->speed) };
+        if (!isCollision(next, map, dummyhead))
             enemy->coord = next;
         
         // To fix bug if the enemy need to move a little bit, the speed will not be use
-        if(enemy->coord.x == prev.x && enemy->coord.y == prev.y){
-            next = (Point){enemy->coord.x + delta.x, enemy->coord.y};
-            if(!isCollision(next, map))
+        if (enemy->coord.x == prev.x && enemy->coord.y == prev.y) {
+            next = (Point){ enemy->coord.x + delta.x, enemy->coord.y };
+            if (!isCollision(next, map, dummyhead))
                 enemy->coord = next;
             
-            next =(Point){enemy->coord.x, enemy->coord.y + delta.y};
-            if(!isCollision(next, map))
+            next = (Point){ enemy->coord.x, enemy->coord.y + delta.y };
+            if (!isCollision(next, map, dummyhead))
                 enemy->coord = next;
         }
         
@@ -258,12 +258,12 @@ void updateEnemyList(enemyNode * dummyhead, Map * map, Player * player){
         do {
             nx = RandNum(0, map->col);
             ny = RandNum(0, map->row);
-        } while (!isWalkable(map, (Point) { nx, ny }));
+        } while (!isWalkable(map, (Point) { nx, ny }) && !isCollision((Point){nx, ny}, map, dummyhead));
         insertEnemyList(dummyhead, createEnemy(nx, ny, slime));
     }
     
     while(cur != NULL){
-        bool shouldDelete = updateEnemy(&cur->enemy, map, player);
+        bool shouldDelete = updateEnemy(&cur->enemy, dummyhead, map, player);
         if(shouldDelete){
             prev->next = cur->next;
             destroyEnemy(&cur->enemy);
@@ -479,25 +479,31 @@ static bool playerCollision(Point enemyCoord, Point playerCoord){
         return false;
     }
 }
-    
-static bool isCollision(Point enemyCoord, Map* map){
-    if( enemyCoord.x < 0 || 
-        enemyCoord.y < 0 || 
+
+//This isCollision shall check for collision with other slimes, avoiding overlap
+static bool isCollision(Point enemyCoord, Map* map, enemyNode* dummyhead) {
+    if (enemyCoord.x < 0 ||
+        enemyCoord.y < 0 ||
         (enemyCoord.x + TILE_SIZE - 1) / TILE_SIZE >= map->col ||
-        (enemyCoord.y + TILE_SIZE - 1) / TILE_SIZE >= map->row) 
+        (enemyCoord.y + TILE_SIZE - 1) / TILE_SIZE >= map->row)
         return true;
 
-    /* 
-        [TODO HACKATHON 2-2] 
-
-        Check every corner of enemy if it's collide or not
-        Return true if it's not walkable
-
-        if(!isWalkable(map->map[...][...])) return true;
-        if(!isWalkable(map->map[...][...])) return true;
-        if(!isWalkable(map->map[...][...])) return true;
-        if(!isWalkable(map->map[...][...])) return true;
-    */
+    //If the distance is larger than 1, its not the current one
+    enemyNode* cur = dummyhead->next;
+    //while (cur != NULL) {
+    //    //Use AABB
+    //    if (enemyCoord.x < cur->enemy.coord.x + TILE_SIZE &&
+    //        enemyCoord.x + TILE_SIZE > cur->enemy.coord.x &&
+    //        enemyCoord.y < cur->enemy.coord.y + TILE_SIZE &&
+    //        enemyCoord.y + TILE_SIZE > cur->enemy.coord.y) {
+    //        //Collision detected, check if checking current square
+    //        double distanceSquared = (enemyCoord.x - cur->enemy.coord.x) * (enemyCoord.x - cur->enemy.coord.x) +
+    //                                 (enemyCoord.y - cur->enemy.coord.y) * (enemyCoord.y - cur->enemy.coord.y);
+    //        if (distanceSquared > 1) return true;
+    //    }
+    //    cur = cur->next;
+    //}
+    
 
     return false;
 }

@@ -37,7 +37,7 @@ void change_status(Player* player, PLAYER_STATUS status) {
     player->animation_tick = 0;
     player->status = status;
 }
-void update_player(Player * player, Map* map){
+void update_player(Player * player, Map* map, int isWeaponShooting){
 
     Point original = player->coord;
 
@@ -72,7 +72,7 @@ void update_player(Player * player, Map* map){
         player->coord.x = round((float)player->coord.x + (float)player->speed * cos(player->direction));
         player->coord.y = round((float)player->coord.y + (float)player->speed * sin(player->direction));
     }
-    if (mouseState.buttons) {
+    if (isWeaponShooting) {
         change_status(player, PLAYER_SHOOTING);
     }
     else if(dirX || dirY){

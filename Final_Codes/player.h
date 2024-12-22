@@ -30,7 +30,7 @@ typedef struct _Player{
 } Player;
 
 Player create_player(char * path, char* death,int frameSize, int row, int col);
-void update_player(Player * player, Map * map);
+void update_player(Player * player, Map * map, int isWeaponShooting);
 void draw_player(Player * player, Point cam);
 void delete_player(Player * player);
 void change_status(Player* player, PLAYER_STATUS status);

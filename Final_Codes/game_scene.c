@@ -67,7 +67,6 @@ static void update(void){
         Change the scene if winning/losing to win/lose scene
     */
 
-    update_player(&player, &map);
 
     /*
         [TODO HACKATHON 1-3]
@@ -78,6 +77,7 @@ static void update(void){
 
         Hint: Adjust it based on player position variable, then subtract it with half of the gameplay screen
     */
+    update_player(&player, &map, weapon.cooldown_counter + mouseState.buttons);
     UpdateCamera();
     updateEnemyList(enemyList, &map, &player);
     if (player.status != PLAYER_ROOMBA) {

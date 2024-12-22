@@ -42,7 +42,11 @@ bool update_bullet(Bullet * bullet, enemyNode * enemyList, Map * map){
             return true;
         }
     */
-    
+    int tile_x = (int)(bullet->coord.x / TILE_SIZE);
+    int tile_y = (int)(bullet->coord.y / TILE_SIZE);
+    if (!isWalkable(map, (Point) { tile_x, tile_y }))
+        return true;
+
     // Check if the bullet collide with the enemies by simple iterating
     enemyNode * cur = enemyList->next;
     while(cur != NULL){
