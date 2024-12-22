@@ -157,7 +157,7 @@ double number_map(double inStart, double inEnd, double outStart, double outEnd, 
     if (value < inStart) return outStart;
     if (value > inEnd) return outEnd;
     double slope = 1.0 * (outEnd - outStart) / (inEnd - inStart);
-    return outStart + floor(slope * (value - inStart) + 0.5);
+    return outStart + slope * (value - inStart);
 }
 
 // *Really* minimal PCG32 code / (c) 2014 M.E. O'Neill / pcg-random.org

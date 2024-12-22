@@ -32,6 +32,28 @@ Button button_create(int x, int y, int w, int h, const char* default_image_path,
 	return button;
 }
 
+Slider slider_create(int x, int y, int w, int h, float min, float max, float* bindedValue, const char* default_img_path) {
+	Slider slider;
+	memset(&slider, 0, sizeof(slider));
+
+	slider.default_img = al_load_bitmap(default_img_path);
+
+	if (!slider.default_img) {
+		game_log("failed loading slider image %s", default_img_path);
+	}
+
+	slider.x = x;
+	slider.y = y;
+	slider.w = w;
+	slider.h = h;
+
+	slider.valMin = min;
+	slider.valMax = max;
+	slider.bindedValue = bindedValue;
+
+	return slider;
+}
+
 void draw_button(Button button, const char* text) {
 	ALLEGRO_BITMAP* _img = button.hovered ? button.hovered_img : button.default_img;
 	al_draw_scaled_bitmap(
@@ -59,6 +81,15 @@ void draw_button(Button button, const char* text) {
 	);
 }
 
+void draw_slider(Slider* slider, ALLEGRO_COLOR ball_color) {
+	al_draw_scaled_bitmap(slider->default_img,
+		0, 0, al_get_bitmap_width(slider->default_img), al_get_bitmap_height(slider->default_img),
+		slider->x, slider->y, slider->w, slider->h, 0);
+	al_draw_filled_circle(slider->x + 
+		number_map(slider->valMin, slider->valMax, 0, slider->w, *(slider->bindedValue)), 
+		slider->y + slider->h / 2, slider->h, ball_color);
+}
+
 void update_button(Button* button) {
 	Point mouse = { mouseState.x, mouseState.y };
 	RecArea rect = { button->x, button->y, button->w, button->h };
@@ -71,9 +102,22 @@ void update_button(Button* button) {
 	button->hovered = mouse_in_rect(mouse, rect);
 }
 
+void update_slider(Slider* slider) {
+	Point mouse = { mouseState.x, mouseState.y };
+	RecArea rect = { slider->x, slider->y, slider->w, slider->h };
+
+	if (mouse_in_rect(mouse, rect) && mouseState.buttons & 1) {
+		*(slider->bindedValue) = number_map(slider->x, slider->x + slider->w, slider->valMin, slider->valMax, mouse.x);
+	}
+}
+
 void destroy_button(Button* button) {
 	al_destroy_bitmap(button->default_img);
 	al_destroy_bitmap(button->hovered_img);
+}
+
+void destroy_slider(Slider* slider) {
+	al_destroy_bitmap(slider->default_img);
 }
 
 static bool mouse_in_rect(Point mouse, RecArea rect) {

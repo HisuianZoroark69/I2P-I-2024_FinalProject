@@ -21,7 +21,7 @@ static void init(void) {
 
 static void update(void) {
     update_button(&mainmenu);
-    if (mainmenu.hovered && mouseState.buttons) {
+    if (mainmenu.hovered && mouseState.buttons & 1) {
         change_scene(create_menu_scene());
     }
     tick++;
