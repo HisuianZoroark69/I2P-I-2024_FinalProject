@@ -25,7 +25,7 @@ static void init(void) {
 static void update(void) {
     timer_countdown--;
     if (timer_countdown == 0) {
-        change_scene(create_game_scene());
+        change_scene(create_game_scene(1, (PlayerStat) {0,0,0}));
     }
 }
 

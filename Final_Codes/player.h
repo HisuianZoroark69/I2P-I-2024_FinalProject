@@ -12,11 +12,17 @@ typedef enum {
     PLAYER_IDLE, PLAYER_WALKING, PLAYER_SHOOTING, PLAYER_DYING, PLAYER_ROOMBA
 } PLAYER_STATUS;
 
+typedef struct _PlayerStat {
+    int speed; // TODO: CHANGE SPEED SCALED TO THE SIZE OF THE TILES
+    int health;
+    int atk;
+    int atkSpd;
+} PlayerStat;
+
 typedef struct _Player{
     Point coord; // coordinate of the player
-    int speed; // TODO: CHANGE SPEED SCALED TO THE SIZE OF THE TILES
     double direction; //Radian
-    int health;
+    PlayerStat stat;
     
     ALLEGRO_BITMAP* image;
     ALLEGRO_BITMAP* death;
@@ -29,7 +35,7 @@ typedef struct _Player{
     int flip;
 } Player;
 
-Player create_player(char * path, char* death,int frameSize, int row, int col);
+Player create_player(char * path, char* death,int frameSize, int row, int col, PlayerStat stat);
 void update_player(Player * player, Map * map, int isWeaponShooting);
 void draw_player(Player * player, Point cam);
 void delete_player(Player * player);

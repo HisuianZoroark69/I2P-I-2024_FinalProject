@@ -7,9 +7,11 @@
 #include "utility.h"
 #include "UI.h"
 #include "game.h"
+#include "player.h"
 
 static Button settingButton;
 static Button startButton;
+static PlayerStat defaultStat = {4, 10, 10, 16};
 
 static void init(void) {
     settingButton = button_create(SCREEN_W / 2 - 200, 600, 400, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
@@ -24,7 +26,7 @@ static void update(void) {
         change_scene(create_setting_scene());
     }
     if (startButton.hovered && mouseState.buttons & 1) {
-        change_scene(create_game_scene());
+        change_scene(create_game_scene(1, defaultStat));
     }
 
     /*

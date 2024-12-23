@@ -13,6 +13,7 @@
 #include <math.h>
 
 Player player; // Player
+PlayerStat pStat;
 Map map; // Map
 enemyNode * enemyList; // Enemy List
 BulletNode * bulletList; // Bullet List
@@ -26,18 +27,20 @@ const int CameraSoftBoundary = 64 * 5;
 
 ALLEGRO_BITMAP* healthImg;
 
+int currentLevel, timeLimit;
+
 static void init(void){
     
     initEnemy();
     
     map = create_map("Assets/map0.txt", 0);
 
-    player = create_player("Assets/arisu.png", "Assets/explode.png", 64, map.Spawn.x, map.Spawn.y);
+    player = create_player("Assets/arisu.png", "Assets/explode.png", 64, map.Spawn.x, map.Spawn.y, pStat);
 
     enemyList = createEnemyList();
     bulletList = createBulletList();
 
-    weapon = create_weapon("Assets/guns.png", "Assets/yellow_bullet.png", 16, 8, 100);
+    weapon = create_weapon("Assets/guns.png", "Assets/yellow_bullet.png", pStat.atkSpd, 8, pStat.atk);
     
     for(int i=0; i<map.EnemySpawnSize; i++){
         Enemy enemy = createEnemy(map.EnemySpawn[i].x, map.EnemySpawn[i].y, map.EnemyCode[i]);
@@ -47,6 +50,8 @@ static void init(void){
     game_log("coord x:%d \n coords y:%d \n", map.Spawn.x, map.Spawn.y);
     healthImg = al_load_bitmap("Assets/heart.png");
     change_bgm("Assets/audio/game_bgm.mp3");
+    
+    timeLimit = currentLevel * 10 * FPS;
 }
 
 void UpdateCamera() {
@@ -61,22 +66,13 @@ void UpdateCamera() {
 }
 
 static void update(void){
-    /*
-        [TODO Homework]
-        
-        Change the scene if winning/losing to win/lose scene
-    */
+    //Update timer
+    timeLimit--;
+    if (timeLimit <= 0) {
+        change_scene(create_level_change_scene());
+        return;
+    }
 
-
-    /*
-        [TODO HACKATHON 1-3]
-        
-        Calcualte the formula for the Camera
-        Camera.x = ...
-        Camera.y = ...
-
-        Hint: Adjust it based on player position variable, then subtract it with half of the gameplay screen
-    */
     update_player(&player, &map, weapon.cooldown_counter + mouseState.buttons);
     UpdateCamera();
     updateEnemyList(enemyList, &map, &player);
@@ -89,15 +85,19 @@ static void update(void){
 }
 
 void drawHP() {
-    if (player.health > 5) {
+    if (player.stat.health > 5) {
         al_draw_bitmap(healthImg, 0, 0, 0);
-        al_draw_textf(P3_FONT, al_map_rgb(255, 255, 255), al_get_bitmap_width(healthImg) + 2, 2, 0, "x%d", player.health);
+        al_draw_textf(P3_FONT, al_map_rgb(255, 255, 255), al_get_bitmap_width(healthImg) + 2, 2, 0, "x%d", player.stat.health);
     }
     else {
-        for (int i = 0; i < player.health; i++) {
+        for (int i = 0; i < player.stat.health; i++) {
             al_draw_bitmap(healthImg, i * al_get_bitmap_width(healthImg), 0, 0);
         }
     }
+}
+
+void drawTimeLimit() {
+    al_draw_textf(P3_FONT, al_map_rgb(255, 255, 255), 400, 50, 0, "Time: %d", timeLimit / FPS);
 }
 
 static void draw(void){
@@ -130,6 +130,7 @@ static void draw(void){
         Draw the UI of Health and Total Coins
     */
     drawHP();
+    drawTimeLimit();
 }
 
 static void destroy(void){
@@ -142,7 +143,7 @@ static void destroy(void){
 }
 
 
-Scene create_game_scene(void){
+Scene create_game_scene(int level, PlayerStat stat) {
     Scene scene;
     memset(&scene, 0, sizeof(Scene));
     
@@ -152,5 +153,8 @@ Scene create_game_scene(void){
     scene.update = &update;
     scene.destroy = &destroy;
     
+    currentLevel = level;
+    pStat = stat;
+
     return scene;
 }

@@ -8,7 +8,7 @@
 static int isCollision(Player* player, Map* map);
 int PlayerFrameSize;
 
-Player create_player(char * path, char* death, int frameSize, int row, int col){
+Player create_player(char * path, char* death, int frameSize, int row, int col, PlayerStat stat){
     Player player;
     memset(&player, 0, sizeof(player));
     PlayerFrameSize = frameSize;
@@ -16,9 +16,7 @@ Player create_player(char * path, char* death, int frameSize, int row, int col){
         col * TILE_SIZE,
         row * TILE_SIZE
     };
-
-    player.speed = 4;
-    player.health = 15;
+    player.stat = stat;
 
     player.image = al_load_bitmap(path);
     if(!player.image){
@@ -48,8 +46,8 @@ void update_player(Player * player, Map* map, int isWeaponShooting){
         }
         return 0;
     }
-    if (player->health <= 0) {
-        player->health = 0;
+    if (player->stat.health <= 0) {
+        player->stat.health = 0;
         change_status(player, PLAYER_DYING);
         return;
     }
@@ -69,8 +67,8 @@ void update_player(Player * player, Map* map, int isWeaponShooting){
 
     if(dirX || dirY){
         player->direction = atan2(dirY, dirX);
-        player->coord.x = round((float)player->coord.x + (float)player->speed * cos(player->direction));
-        player->coord.y = round((float)player->coord.y + (float)player->speed * sin(player->direction));
+        player->coord.x = round((float)player->coord.x + (float)player->stat.speed * cos(player->direction));
+        player->coord.y = round((float)player->coord.y + (float)player->stat.speed * sin(player->direction));
     }
     if (isWeaponShooting) {
         change_status(player, PLAYER_SHOOTING);
@@ -169,6 +167,6 @@ void hitPlayer(Player * player, Point enemy_coord, int damage){
         player->knockback_angle = angle;
         player->knockback_CD = 1;
 
-        player->health -= 1;
+        player->stat.health -= 1;
     }
 }

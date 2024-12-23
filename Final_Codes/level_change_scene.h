@@ -1,5 +1,5 @@
-#ifndef loading_scene_h
-#define loading_scene_h
+#ifndef level_change_scene_h
+#define level_change_scene_h
 
 #include "utility.h"
 
