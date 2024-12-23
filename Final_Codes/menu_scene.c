@@ -33,12 +33,6 @@ static void update(void) {
     if (startButton.hovered && mouseButtonUp & 1) {
         change_scene(create_game_scene(1, 0, defaultStat));
     }
-
-    /*
-        [TODO HACKATHON 4-3] 
-        
-        Change scene to setting scene when the button is pressed
-    */
 }
 
 static void draw(void) {

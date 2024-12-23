@@ -52,7 +52,7 @@ static void init(void){
     healthImg = al_load_bitmap("Assets/heart.png");
     change_bgm("Assets/audio/game_bgm.mp3");
     
-    timeLimit = currentLevel * 10 * FPS;
+    timeLimit = currentLevel * 5 * FPS;
 }
 
 void UpdateCamera() {

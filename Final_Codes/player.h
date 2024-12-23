@@ -13,11 +13,11 @@ typedef enum {
 } PLAYER_STATUS;
 
 typedef struct _PlayerStat {
-    int speed; // TODO: CHANGE SPEED SCALED TO THE SIZE OF THE TILES
+    float speed; // TODO: CHANGE SPEED SCALED TO THE SIZE OF THE TILES
     int health;
-    int atk;
-    int atkSpd;
-    int evasion;
+    float atk;
+    float atkSpd;
+    float evasion;
 } PlayerStat;
 
 typedef struct _Player{
@@ -43,4 +43,4 @@ void delete_player(Player * player);
 void change_status(Player* player, PLAYER_STATUS status);
 void hitPlayer(Player * player, Point enemy_coord, int damage);
 
-#endif /* player_h */
+#endif w/* player_h */
