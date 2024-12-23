@@ -12,6 +12,7 @@
  */
 
 ALLEGRO_BITMAP * slimeBitmap;
+ALLEGRO_BITMAP* explode;
 int MaxEnemySpawnCD = 60;
 int EnemySpawnCD = 60;
 int EnemyBaseHP;
@@ -38,12 +39,13 @@ void initEnemy(void){
     // Slime
     char * slimePath = "Assets/Slime.png";
     slimeBitmap = al_load_bitmap(slimePath);
+    explode = al_load_bitmap("Assets/explode.png");
     if(!slimeBitmap){
         game_abort("Error Load Bitmap with path : %s", slimePath);
     }
 }
 
-Enemy createEnemy(int row, int col, char type){
+Enemy createEnemy(int row, int col, enemyType type){
     game_log("Creating Enemy at ( %d, %d )", row, col);
     
     Enemy enemy;
@@ -59,13 +61,19 @@ Enemy createEnemy(int row, int col, char type){
     };
     
     switch(type){
-        case 'S':
+        case slime:
             enemy.health = EnemyBaseHP;
             enemy.type = slime;
             enemy.speed = 2;
             enemy.image = slimeBitmap;
             break;
         // Insert more here to have more enemy variant
+        case c4slime:
+            enemy.health = EnemyBaseHP >> 2; // 1/4 normal hp
+            enemy.type = c4slime;
+            enemy.speed = 4;
+            enemy.image = slimeBitmap;
+            break;
         default:
             enemy.health = EnemyBaseHP;
             enemy.type = slime;
@@ -88,7 +96,8 @@ bool updateEnemy(Enemy* enemy, enemyNode* dummyhead, Map* map, Player* player) {
             Return true when the enemy is dead
         */ 
         enemy->death_animation_tick = (enemy->death_animation_tick + 1);
-        if (enemy->death_animation_tick >= 8) return true;
+        if (enemy->death_animation_tick >= 8 && enemy->type == slime) return true;
+        if (enemy->death_animation_tick >= 60) return true;
         return false;
     }
     
@@ -150,12 +159,19 @@ bool updateEnemy(Enemy* enemy, enemyNode* dummyhead, Map* map, Player* player) {
                 enemy->coord = next;
         }
         
-        //Draw enemy
+        //Update enemy
         if (enemy->type == slime) {
             if (playerCollision(enemy->coord, player->coord) && enemy->animation_hit_tick == 0) {
                 enemy->animation_tick = 0;
                 enemy->animation_hit_tick = 32;
-                hitPlayer(player, enemy->coord, 10);
+                hitPlayer(player, enemy->coord, 1);
+            }
+        }
+        if (enemy->type == c4slime) {
+            if (playerCollision(enemy->coord, player->coord) && enemy->animation_hit_tick == 0) {
+                enemy->health = 0;
+                enemy->status = DYING;
+                hitPlayer(player, enemy->coord, 5);
             }
         }
     }
@@ -181,6 +197,11 @@ void drawEnemy(Enemy * enemy, Point cam){
                 0, 0, dx, dy, TILE_SIZE / 16, TILE_SIZE / 16,
                 0, flag);
         }
+        if (enemy->type == c4slime) {
+            al_draw_tinted_scaled_rotated_bitmap_region(enemy->image, offset, 0, 16, 16, al_map_rgb(tint_red, 0, 255),
+                0, 0, dx, dy, TILE_SIZE / 16, TILE_SIZE / 16,
+                0, flag);
+        }
     }
     else if(enemy->status == DYING){
         /*
@@ -188,10 +209,13 @@ void drawEnemy(Enemy * enemy, Point cam){
 
             Draw Dying Animation for enemy
         */
-        int offset = 16 * (int)(enemy->death_animation_tick);
+        ALLEGRO_BITMAP* img = enemy->type == slime ? enemy->image : explode;
+        int frameSize = enemy->type == slime ? 16 : 64;
+        int y = enemy->type == slime ? 16 : 0;
+        int offset = frameSize * (int)(enemy->death_animation_tick);
         int flag = enemy->dir == RIGHT ? 1 : 0;
-        al_draw_tinted_scaled_rotated_bitmap_region(enemy->image, offset, 16, 16, 16, al_map_rgb(255, 255, 255),
-            0, 0, dx, dy, TILE_SIZE / 16, TILE_SIZE / 16,
+        al_draw_tinted_scaled_rotated_bitmap_region(img, offset, y, frameSize, frameSize, al_map_rgb(255, 255, 255),
+            0, 0, dx, dy, TILE_SIZE / frameSize, TILE_SIZE / frameSize,
             0, flag);
     }
     
@@ -209,6 +233,7 @@ void destroyEnemy(Enemy * enemy){
 
 void terminateEnemy(void) {
     al_destroy_bitmap(slimeBitmap);
+    al_destroy_bitmap(explode);
 }
 
 void hitEnemyNoKnockback(Enemy* enemy, int damage) {
@@ -261,7 +286,8 @@ void updateEnemyList(enemyNode * dummyhead, Map * map, Player * player){
             nx = RandNum(0, map->col);
             ny = RandNum(0, map->row);
         } while (!isWalkable(map, (Point) { nx, ny }) && !isCollision((Point){nx, ny}, map, dummyhead));
-        insertEnemyList(dummyhead, createEnemy(nx, ny, slime));
+        enemyType type = (RandNum(0, 100) < 10) ? c4slime : slime;
+        insertEnemyList(dummyhead, createEnemy(nx, ny, type));
     }
     
     while(cur != NULL){

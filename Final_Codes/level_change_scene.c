@@ -45,16 +45,16 @@ static void update(void) {
         currentStat.atk += 2;
         points--;
     }
-    if (addStatButtons[2].hovered && mouseButtonUp & 1 && currentStat.atkSpd >= 2) {
+    if (addStatButtons[2].hovered && mouseButtonUp & 1 && currentStat.atkSpd > 2) {
         currentStat.atkSpd -= 1;
         points--;
     }
-    if (addStatButtons[3].hovered && mouseButtonUp & 1 && currentStat.speed <= 10) {
+    if (addStatButtons[3].hovered && mouseButtonUp & 1 && currentStat.speed < 10) {
         currentStat.speed *= 1.15;
         if (currentStat.speed >= 10) currentStat.speed = 10;
         points--;
     }
-    if (addStatButtons[4].hovered && mouseButtonUp & 1 && currentStat.evasion <= 50) {
+    if (addStatButtons[4].hovered && mouseButtonUp & 1 && currentStat.evasion < 50) {
         currentStat.evasion += 5;
         points--;
     }

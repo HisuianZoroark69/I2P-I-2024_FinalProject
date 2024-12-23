@@ -170,6 +170,6 @@ void hitPlayer(Player * player, Point enemy_coord, int damage){
         //Evasion
         int chance = RandNum(0, 100);
         if(chance > player->stat.evasion)
-            player->stat.health -= 1;
+            player->stat.health -= damage;
     }
 }
