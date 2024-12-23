@@ -165,8 +165,11 @@ void hitPlayer(Player * player, Point enemy_coord, int damage){
         float angle = atan2(dY, dX);
 
         player->knockback_angle = angle;
-        player->knockback_CD = 1;
+        player->knockback_CD = 4;
 
-        player->stat.health -= 1;
+        //Evasion
+        int chance = RandNum(0, 100);
+        if(chance > player->stat.evasion)
+            player->stat.health -= 1;
     }
 }
