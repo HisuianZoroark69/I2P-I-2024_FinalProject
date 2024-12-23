@@ -19,13 +19,13 @@ enemyNode * enemyList; // Enemy List
 BulletNode * bulletList; // Bullet List
 
 // Weapon
-Weapon weapon; 
-int coins_obtained;
+Weapon weapon;
 
 Point Camera;
 const int CameraSoftBoundary = 64 * 5;
 
 ALLEGRO_BITMAP* healthImg;
+ALLEGRO_BITMAP* coinIconImg;
 
 int currentLevel, timeLimit;
 int upgradePoints;
@@ -50,6 +50,7 @@ static void init(void){
 
     game_log("coord x:%d \n coords y:%d \n", map.Spawn.x, map.Spawn.y);
     healthImg = al_load_bitmap("Assets/heart.png");
+    coinIconImg = al_load_bitmap("Assets/coin_icon.png");
     change_bgm("Assets/audio/game_bgm.mp3");
     
     timeLimit = currentLevel * 5 * FPS;
@@ -81,11 +82,11 @@ static void update(void){
         update_weapon(&weapon, bulletList, player.coord, Camera);
     }
     updateBulletList(bulletList, enemyList, &map);
-    update_map(&map, player.coord, &coins_obtained);
+    update_map(&map, player.coord, &upgradePoints);
     
 }
 
-void drawHP() {
+void drawHPAndCoin() {
     if (player.stat.health > 5) {
         al_draw_bitmap(healthImg, 0, 0, 0);
         al_draw_textf(P3_FONT, al_map_rgb(255, 255, 255), al_get_bitmap_width(healthImg) + 2, 2, 0, "x%d", player.stat.health);
@@ -95,6 +96,8 @@ void drawHP() {
             al_draw_bitmap(healthImg, i * al_get_bitmap_width(healthImg), 0, 0);
         }
     }
+    al_draw_bitmap(coinIconImg, 0, 30, 0);
+    al_draw_textf(P3_FONT, al_map_rgb(255, 255, 255), al_get_bitmap_width(coinIconImg), 30, 0, "%d", upgradePoints);
 }
 
 void drawTimeLimit() {
@@ -123,19 +126,21 @@ static void draw(void){
         draw_weapon(&weapon, player.coord, Camera);
     }
 
-    if (player.status == PLAYER_DYING && player.animation_tick >= 60) {
-        change_scene(create_gameover_scene(al_get_backbuffer(al_get_current_display())));
-    }
     /*
         [TODO Homework]
         
         Draw the UI of Health and Total Coins
     */
-    drawHP();
+    drawHPAndCoin();
     drawTimeLimit();
+    if (player.status == PLAYER_DYING && player.animation_tick >= 60) {
+        change_scene(create_gameover_scene(al_get_backbuffer(al_get_current_display())));
+    }
 }
 
 static void destroy(void){
+    al_destroy_bitmap(healthImg);
+    al_destroy_bitmap(coinIconImg);
     delete_player(&player);
     delete_weapon(&weapon);
     destroy_map(&map);
