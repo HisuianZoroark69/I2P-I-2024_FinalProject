@@ -18,6 +18,7 @@
 */
 extern bool keyState[ALLEGRO_KEY_MAX];
 extern ALLEGRO_MOUSE_STATE mouseState;
+extern int mouseButtonUp;
 
 // Function to change from one scene to another.
 void change_scene(Scene next_scene);

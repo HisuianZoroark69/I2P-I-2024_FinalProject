@@ -27,11 +27,11 @@ static void init(void) {
 static void update(void) {
     update_button(&settingButton);
     update_button(&startButton); 
-    if (settingButton.hovered && mouseState.buttons & 1) {
+    if (settingButton.hovered && mouseButtonUp & 1) {
         change_scene(create_setting_scene());
     }
-    if (startButton.hovered && mouseState.buttons & 1) {
-        change_scene(create_game_scene(1, defaultStat));
+    if (startButton.hovered && mouseButtonUp & 1) {
+        change_scene(create_game_scene(1, 0, defaultStat));
     }
 
     /*

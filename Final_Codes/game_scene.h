@@ -4,6 +4,6 @@
 #include "utility.h"
 #include "player.h"
 
-Scene create_game_scene(int level, PlayerStat stat);
+Scene create_game_scene(int level, int points, PlayerStat stat);
 
 #endif /* game_scene_h */

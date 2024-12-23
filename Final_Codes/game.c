@@ -10,6 +10,7 @@ static ALLEGRO_EVENT event;
 
 bool keyState[ALLEGRO_KEY_MAX] = { false };  // Array to track the state of each key
 ALLEGRO_MOUSE_STATE mouseState;
+int mouseButtonUp;
 
 Scene current_scene;
 
@@ -133,7 +134,6 @@ void start_loop(void){
         
         // Get Allegro Event
         al_wait_for_event(event_queue, &event);
-
         switch(event.type)
         {
             // Close the game
@@ -159,6 +159,10 @@ void start_loop(void){
                 game_log("Key %d up", event.keyboard.keycode);
                 keyState[event.keyboard.keycode] = false;
                 break;
+            case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
+                game_log("Mouse %d up", event.mouse.button);
+                mouseButtonUp |= 1 << (event.mouse.button - 1);
+                break;
         }
         
         // Get Mouse State
@@ -180,6 +184,9 @@ void start_loop(void){
 
             // Draw
             current_scene.draw();
+
+            //Reset mouse button up
+            mouseButtonUp = 0;
             
             // Flip the display
             al_flip_display();

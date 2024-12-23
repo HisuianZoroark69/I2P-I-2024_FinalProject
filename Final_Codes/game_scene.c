@@ -145,7 +145,7 @@ static void destroy(void){
 }
 
 
-Scene create_game_scene(int level, PlayerStat stat) {
+Scene create_game_scene(int level, int points, PlayerStat stat) {
     Scene scene;
     memset(&scene, 0, sizeof(Scene));
     
@@ -157,6 +157,7 @@ Scene create_game_scene(int level, PlayerStat stat) {
     
     currentLevel = level;
     pStat = stat;
+    upgradePoints = points;
 
     return scene;
 }
