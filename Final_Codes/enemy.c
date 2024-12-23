@@ -14,6 +14,7 @@
 ALLEGRO_BITMAP * slimeBitmap;
 int MaxEnemySpawnCD = 60;
 int EnemySpawnCD = 60;
+int EnemyBaseHP;
 
 // To check if p0 sprite and p1 sprite can go directly
 static bool validLine(Map* map, Point p0, Point p1);
@@ -59,14 +60,14 @@ Enemy createEnemy(int row, int col, char type){
     
     switch(type){
         case 'S':
-            enemy.health = 100;
+            enemy.health = EnemyBaseHP;
             enemy.type = slime;
             enemy.speed = 2;
             enemy.image = slimeBitmap;
             break;
         // Insert more here to have more enemy variant
         default:
-            enemy.health = 100;
+            enemy.health = EnemyBaseHP;
             enemy.type = slime;
             enemy.speed = 2;
             enemy.image = slimeBitmap;
@@ -234,9 +235,10 @@ void hitEnemy(Enemy * enemy, int damage, float angle){
         (5) DESTROY     : DESTROY THE LINKED LIST
  */
 
-enemyNode * createEnemyList(void){
+enemyNode* createEnemyList(int baseHP) {
     enemyNode * dummyhead = (enemyNode *) malloc(sizeof(enemyNode));
     dummyhead->next = NULL;
+    EnemyBaseHP = baseHP;
     return dummyhead;
 }
 

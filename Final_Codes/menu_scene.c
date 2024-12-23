@@ -11,12 +11,17 @@
 
 static Button settingButton;
 static Button startButton;
-static PlayerStat defaultStat = {4, 10, 10, 16};
+static PlayerStat defaultStat;
 
 static void init(void) {
     settingButton = button_create(SCREEN_W / 2 - 200, 600, 400, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
     startButton = button_create(SCREEN_W / 2 - 200 , 450, 400, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
     change_bgm("Assets/audio/menu_bgm.mp3");
+    defaultStat.atk = 10;
+    defaultStat.atkSpd = 30;
+    defaultStat.evasion = 0;
+    defaultStat.health = 10;
+    defaultStat.speed = 4;
 }
 
 static void update(void) {
@@ -63,6 +68,7 @@ static void draw(void) {
 
 static void destroy(void) {
     destroy_button(&settingButton);
+    destroy_button(&startButton);
 }
 
 

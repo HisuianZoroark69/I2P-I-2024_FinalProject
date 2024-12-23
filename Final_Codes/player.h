@@ -17,6 +17,7 @@ typedef struct _PlayerStat {
     int health;
     int atk;
     int atkSpd;
+    int evasion;
 } PlayerStat;
 
 typedef struct _Player{

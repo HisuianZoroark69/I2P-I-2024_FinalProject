@@ -28,6 +28,7 @@ const int CameraSoftBoundary = 64 * 5;
 ALLEGRO_BITMAP* healthImg;
 
 int currentLevel, timeLimit;
+int upgradePoints;
 
 static void init(void){
     
@@ -37,7 +38,7 @@ static void init(void){
 
     player = create_player("Assets/arisu.png", "Assets/explode.png", 64, map.Spawn.x, map.Spawn.y, pStat);
 
-    enemyList = createEnemyList();
+    enemyList = createEnemyList(currentLevel * 10);
     bulletList = createBulletList();
 
     weapon = create_weapon("Assets/guns.png", "Assets/yellow_bullet.png", pStat.atkSpd, 8, pStat.atk);
@@ -69,7 +70,7 @@ static void update(void){
     //Update timer
     timeLimit--;
     if (timeLimit <= 0) {
-        change_scene(create_level_change_scene());
+        change_scene(create_level_change_scene(currentLevel + 1, upgradePoints, player.stat));
         return;
     }
 
@@ -97,6 +98,7 @@ void drawHP() {
 }
 
 void drawTimeLimit() {
+    al_draw_textf(P3_FONT, al_map_rgb(255, 255, 255), 400, 20, 0, "Level: %d", currentLevel);
     al_draw_textf(P3_FONT, al_map_rgb(255, 255, 255), 400, 50, 0, "Time: %d", timeLimit / FPS);
 }
 

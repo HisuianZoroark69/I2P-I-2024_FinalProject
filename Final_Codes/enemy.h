@@ -57,7 +57,7 @@ typedef struct _enemyNode {
     struct _enemyNode * next;
 } enemyNode;
 
-enemyNode * createEnemyList(void);
+enemyNode * createEnemyList(int baseHP);
 void insertEnemyList(enemyNode * dummyhead, Enemy _enemy);
 void updateEnemyList(enemyNode * dummyhead, Map * map, Player * player);
 void drawEnemyList(enemyNode * dummyhead, Point cam);
