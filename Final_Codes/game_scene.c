@@ -69,7 +69,7 @@ void UpdateCamera() {
 
 static void update(void){
     //Update timer
-    timeLimit--;
+    if(player.status != PLAYER_DYING) timeLimit--;
     if (timeLimit <= 0) {
         change_scene(create_level_change_scene(currentLevel + 1, upgradePoints, player.stat));
         return;
