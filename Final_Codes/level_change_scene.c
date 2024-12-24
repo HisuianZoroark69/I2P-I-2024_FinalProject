@@ -70,6 +70,9 @@ static void draw(void) {
 
 
     for (int i = 0; i < statCount; i++) {
+        if (i == 2 && currentStat.atkSpd <= 2) continue;
+        if (i == 3 && currentStat.speed >= 10) continue;
+        if (i == 4 && currentStat.evasion >= 50) continue;
         draw_button(addStatButtons[i], "+");
     }
     draw_button(nextLevelButton, "Next level");
