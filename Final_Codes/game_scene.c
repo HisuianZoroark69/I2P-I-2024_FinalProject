@@ -9,6 +9,7 @@
 #include "enemy.h"
 #include "weapon.h"
 #include "UI.h"
+#include "Item.h"
 
 #include <math.h>
 
@@ -17,6 +18,7 @@ PlayerStat pStat;
 Map map; // Map
 enemyNode * enemyList; // Enemy List
 BulletNode * bulletList; // Bullet List
+ItemNode* itemList;
 
 // Weapon
 Weapon weapon;
@@ -33,6 +35,7 @@ int upgradePoints;
 static void init(void){
     
     initEnemy();
+    init_item();
     
     map = create_map("Assets/map0.txt", 0);
 
@@ -40,6 +43,7 @@ static void init(void){
 
     enemyList = createEnemyList(currentLevel * 10);
     bulletList = createBulletList();
+    itemList = create_item_list();
 
     weapon = create_weapon("Assets/guns.png", "Assets/yellow_bullet.png", pStat.atkSpd, 8, pStat.atk);
     
@@ -76,8 +80,9 @@ static void update(void){
     }
 
     update_player(&player, &map, weapon.cooldown_counter + mouseState.buttons);
+    update_item_list(itemList, (ItemParam){&player, &upgradePoints});
     UpdateCamera();
-    updateEnemyList(enemyList, &map, &player);
+    updateEnemyList(enemyList, &map, &player, itemList);
     if (player.status != PLAYER_ROOMBA) {
         update_weapon(&weapon, bulletList, player.coord, Camera);
     }
@@ -86,7 +91,7 @@ static void update(void){
     
 }
 
-void drawHPAndCoin() {
+void drawUI() {
     if (player.stat.health > 5) {
         al_draw_bitmap(healthImg, 0, 0, 0);
         al_draw_textf(P3_FONT, al_map_rgb(255, 255, 255), al_get_bitmap_width(healthImg) + 2, 2, 0, "x%d", player.stat.health);
@@ -96,6 +101,7 @@ void drawHPAndCoin() {
             al_draw_bitmap(healthImg, i * al_get_bitmap_width(healthImg), 0, 0);
         }
     }
+    //UI
     al_draw_bitmap(coinIconImg, 0, 30, 0);
     al_draw_textf(P3_FONT, al_map_rgb(255, 255, 255), al_get_bitmap_width(coinIconImg), 30, 0, "%d", upgradePoints);
 }
@@ -125,13 +131,14 @@ static void draw(void){
     if (player.status != PLAYER_ROOMBA && player.status != PLAYER_DYING) {
         draw_weapon(&weapon, player.coord, Camera);
     }
+    draw_item_list(itemList, &Camera);
 
     /*
         [TODO Homework]
         
         Draw the UI of Health and Total Coins
     */
-    drawHPAndCoin();
+    drawUI();
     drawTimeLimit();
     if (player.status == PLAYER_DYING && player.animation_tick >= 60) {
         change_scene(create_gameover_scene(al_get_backbuffer(al_get_current_display())));
@@ -146,7 +153,9 @@ static void destroy(void){
     destroy_map(&map);
     destroyBulletList(bulletList);
     destroyEnemyList(enemyList);
+    destroy_item_list(itemList);
     terminateEnemy();
+    terminate_item();
 }
 
 

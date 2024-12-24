@@ -9,6 +9,7 @@
 #include "utility.h"
 #include "map.h"
 #include "player.h"
+#include "Item.h"
 
 typedef enum{
     slime, c4slime
@@ -27,6 +28,11 @@ typedef struct _enemy{
     int health;
     
     EnemyStatus status;
+
+    //The rate of items work as follow:
+    // |----------------------|------.....-----|-------------------------|----------------------|
+    // 0   Rate of item1    Item1           ItenN-1    Rate of ItemN   ItemN   Rate of none    100
+    int itemRate[ItemTypeCount];
     
     // Knockback
     float knockback_angle;
@@ -59,7 +65,7 @@ typedef struct _enemyNode {
 
 enemyNode * createEnemyList(int baseHP);
 void insertEnemyList(enemyNode * dummyhead, Enemy _enemy);
-void updateEnemyList(enemyNode * dummyhead, Map * map, Player * player);
+void updateEnemyList(enemyNode * dummyhead, Map * map, Player * player, ItemNode* itemList);
 void drawEnemyList(enemyNode * dummyhead, Point cam);
 void destroyEnemyList(enemyNode * dummyhead);
 

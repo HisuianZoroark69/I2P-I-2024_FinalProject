@@ -4,6 +4,7 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include "Item.h"
 
 #define QUEUE_SIZE 2000
 
@@ -66,13 +67,15 @@ Enemy createEnemy(int row, int col, enemyType type){
             enemy.type = slime;
             enemy.speed = 2;
             enemy.image = slimeBitmap;
+            enemy.itemRate[Coin] = 50;
             break;
         // Insert more here to have more enemy variant
         case c4slime:
             enemy.health = EnemyBaseHP >> 2; // 1/4 normal hp
             enemy.type = c4slime;
-            enemy.speed = 4;
+            enemy.speed = EnemyBaseHP / 10;  // Speed increase with hp
             enemy.image = slimeBitmap;
+            enemy.itemRate[Coin] = 50;
             break;
         default:
             enemy.health = EnemyBaseHP;
@@ -274,9 +277,9 @@ void insertEnemyList(enemyNode * dummyhead, Enemy _enemy){
     dummyhead->next = tmp;
 }
 
-void updateEnemyList(enemyNode * dummyhead, Map * map, Player * player){
-    enemyNode * cur = dummyhead->next;
-    enemyNode * prev = dummyhead;
+void updateEnemyList(enemyNode* dummyhead, Map* map, Player* player, ItemNode* itemList) {
+    enemyNode* cur = dummyhead->next;
+    enemyNode* prev = dummyhead;
 
     EnemySpawnCD--;
     if (EnemySpawnCD <= 0) {
@@ -285,7 +288,7 @@ void updateEnemyList(enemyNode * dummyhead, Map * map, Player * player){
         do {
             nx = RandNum(0, map->col);
             ny = RandNum(0, map->row);
-        } while (!isWalkable(map, (Point) { nx, ny }) && !isCollision((Point){nx, ny}, map, dummyhead));
+        } while (!isWalkable(map, (Point) { nx, ny }) && !isCollision((Point) { nx, ny }, map, dummyhead));
         enemyType type = (RandNum(0, 100) < 10) ? c4slime : slime;
         insertEnemyList(dummyhead, createEnemy(nx, ny, type));
     }
@@ -293,10 +296,26 @@ void updateEnemyList(enemyNode * dummyhead, Map * map, Player * player){
     while(cur != NULL){
         bool shouldDelete = updateEnemy(&cur->enemy, dummyhead, map, player);
         if(shouldDelete){
+            //Spawn item, the item spawned is the one the rate is smaller but closest to
+            int rate = RandNum(0, 100);
+            int distance = 100;
+            ItemType itemType = ItemTypeCount;
+            for (int i = 0; i < ItemTypeCount; i++) {
+                int curItemRate = cur->enemy.itemRate[i];
+                if (rate < curItemRate && rate - curItemRate < distance) {
+                    itemType = i;
+                    distance = rate - curItemRate;
+                }
+            }
+            game_log("Current rate: %2d, item type: %d", rate, itemType);
+            insert_item_list(itemList, create_item(itemType, cur->enemy.coord));
+
+            //Delete the enemy
             prev->next = cur->next;
             destroyEnemy(&cur->enemy);
             free(cur);
             cur = prev->next;
+
         }
         else{
             prev = cur;
@@ -520,6 +539,7 @@ static bool isCollision(Point enemyCoord, Map* map, enemyNode* dummyhead) {
     enemyNode* cur = dummyhead->next;
     //while (cur != NULL) {
     //    //Use AABB
+    // 
     //    if (enemyCoord.x < cur->enemy.coord.x + TILE_SIZE &&
     //        enemyCoord.x + TILE_SIZE > cur->enemy.coord.x &&
     //        enemyCoord.y < cur->enemy.coord.y + TILE_SIZE &&
