@@ -67,7 +67,9 @@ Enemy createEnemy(int row, int col, enemyType type){
             enemy.type = slime;
             enemy.speed = 2;
             enemy.image = slimeBitmap;
-            enemy.itemRate[Coin] = 50;
+            enemy.itemRate[Potion] = 5;
+            enemy.itemRate[Coin] = 55;
+            enemy.damage = 1;
             break;
         // Insert more here to have more enemy variant
         case c4slime:
@@ -75,7 +77,9 @@ Enemy createEnemy(int row, int col, enemyType type){
             enemy.type = c4slime;
             enemy.speed = EnemyBaseHP / 10;  // Speed increase with hp
             enemy.image = slimeBitmap;
-            enemy.itemRate[Coin] = 50;
+            enemy.itemRate[Potion] = 10;
+            enemy.itemRate[Coin] = 60;
+            enemy.damage = 5;
             break;
         default:
             enemy.health = EnemyBaseHP;
@@ -128,10 +132,10 @@ bool updateEnemy(Enemy* enemy, enemyNode* dummyhead, Map* map, Player* player) {
             enemy->coord = next;
         }
     }
-    else{
+    else {
         /*
             [TODO Homework]
-            
+
             Replace delta variable with the function below to start enemy movement
             Point delta = shortestPath(map, enemy->coord, player->coord);
         */
@@ -139,46 +143,48 @@ bool updateEnemy(Enemy* enemy, enemyNode* dummyhead, Map* map, Player* player) {
         //Point delta = shortestPath(map, enemy->coord, player->coord);
         PointFloat delta = findScaledDistanceF(enemy->coord, player->coord);
         Point next, prev = enemy->coord;
-        
+
         if (delta.x > 0) enemy->dir = RIGHT;
         if (delta.x < 0) enemy->dir = LEFT;
-        
+
         next = (Point){ round((float)enemy->coord.x + delta.x * (float)enemy->speed), enemy->coord.y };
         if (!isCollision(next, map, dummyhead))
             enemy->coord = next;
-        
+
         next = (Point){ enemy->coord.x, round((float)enemy->coord.y + delta.y * (float)enemy->speed) };
         if (!isCollision(next, map, dummyhead))
             enemy->coord = next;
-        
+
         // To fix bug if the enemy need to move a little bit, the speed will not be use
         if (enemy->coord.x == prev.x && enemy->coord.y == prev.y) {
             next = (Point){ enemy->coord.x + delta.x, enemy->coord.y };
             if (!isCollision(next, map, dummyhead))
                 enemy->coord = next;
-            
+
             next = (Point){ enemy->coord.x, enemy->coord.y + delta.y };
             if (!isCollision(next, map, dummyhead))
                 enemy->coord = next;
         }
-        
+
         //Update enemy
-        if (enemy->type == slime) {
-            if (playerCollision(enemy->coord, player->coord) && enemy->animation_hit_tick == 0) {
+        if (playerCollision(enemy->coord, player->coord) && enemy->animation_hit_tick == 0) {
+            //KMS if player is in roomba mode, dealing 0 damage
+            if (player->status == PLAYER_ROOMBA) {
+                enemy->status = DYING;
+                enemy->health = 0;
+                return false;
+            }
+            hitPlayer(player, enemy->coord, enemy->damage);
+            if (enemy->type == slime) {
                 enemy->animation_tick = 0;
                 enemy->animation_hit_tick = 32;
-                hitPlayer(player, enemy->coord, 1);
             }
-        }
-        if (enemy->type == c4slime) {
-            if (playerCollision(enemy->coord, player->coord) && enemy->animation_hit_tick == 0) {
+            if (enemy->type == c4slime) {
                 enemy->health = 0;
                 enemy->status = DYING;
-                hitPlayer(player, enemy->coord, 5);
             }
         }
     }
-
     return false;
 }
 
@@ -302,12 +308,13 @@ void updateEnemyList(enemyNode* dummyhead, Map* map, Player* player, ItemNode* i
             ItemType itemType = ItemTypeCount;
             for (int i = 0; i < ItemTypeCount; i++) {
                 int curItemRate = cur->enemy.itemRate[i];
-                if (rate < curItemRate && rate - curItemRate < distance) {
+                int comp = curItemRate - rate;
+                if (rate < curItemRate && comp < distance && comp >= 0) {
                     itemType = i;
                     distance = rate - curItemRate;
                 }
             }
-            game_log("Current rate: %2d, item type: %d", rate, itemType);
+            game_log("Current rate: %2d, distance: %2d, item type: %d", rate, distance, itemType);
             insert_item_list(itemList, create_item(itemType, cur->enemy.coord));
 
             //Delete the enemy

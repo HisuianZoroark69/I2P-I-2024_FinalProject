@@ -4,7 +4,6 @@
 #include "map.h"
 
 #include <math.h>
-
 static int isCollision(Player* player, Map* map);
 int PlayerFrameSize;
 
@@ -30,7 +29,7 @@ Player create_player(char * path, char* death, int frameSize, int row, int col, 
     return player;
 }
 
-void change_status(Player* player, PLAYER_STATUS status) {
+void change_player_status(Player* player, PLAYER_STATUS status) {
     if (player->status == status) return;
     player->animation_tick = 0;
     player->status = status;
@@ -48,7 +47,7 @@ void update_player(Player * player, Map* map, int isWeaponShooting){
     }
     if (player->stat.health <= 0) {
         player->stat.health = 0;
-        change_status(player, PLAYER_DYING);
+        change_player_status(player, PLAYER_DYING);
         return;
     }
 
@@ -70,20 +69,34 @@ void update_player(Player * player, Map* map, int isWeaponShooting){
         player->coord.x = round((float)player->coord.x + (float)player->stat.speed * cos(player->direction));
         player->coord.y = round((float)player->coord.y + (float)player->stat.speed * sin(player->direction));
     }
-    if (isWeaponShooting) {
-        change_status(player, PLAYER_SHOOTING);
-    }
-    else if(dirX || dirY){
-        change_status(player, PLAYER_WALKING);
-    }
-    else {
-        change_status(player, PLAYER_IDLE);
-    }
     DIRECTION collisionDir = isCollision(player, map);
     if (collisionDir & UP || collisionDir & DOWN) player->coord.y = original.y;
     if (collisionDir & LEFT || collisionDir & RIGHT) player->coord.x = original.x;
+    
+    //If player is transforming or in roomba mode, dont update the status
+    if (player->status == PLAYER_TRANSFORMING) {
+        if (player->animation_tick >= ROOMBA_TRANSFORM_TIME - 1) { //Minus 1 to prevent glitching back to 1st frame
+            player->status = player->roombaTimeLeft ? PLAYER_ROOMBA : PLAYER_IDLE;
+        }
+    }
+    else if (player->status == PLAYER_ROOMBA) {
+        if (player->roombaTimeLeft == 0) {
+            change_player_status(player, PLAYER_TRANSFORMING);
+        }
+    }
+    else if (isWeaponShooting) {
+        change_player_status(player, PLAYER_SHOOTING);
+    }
+    else if(dirX || dirY){
+        change_player_status(player, PLAYER_WALKING);
+    }
+    else {
+        change_player_status(player, PLAYER_IDLE);
+    }
 
     player->animation_tick = (player->animation_tick + 1) % 60;
+    player->roombaTimeLeft--;
+    if (player->roombaTimeLeft < 0) player->roombaTimeLeft = 0;
     return 0;
 }
 
@@ -107,19 +120,30 @@ void draw_player(Player * player, Point cam){
     else image = player->image;
 
     int xOffset = player->animation_tick;
-    if (player->status != PLAYER_DYING) {
+    if (player->status == PLAYER_ROOMBA) {
+        //Revert flip to acomodate the bitmap
+        xOffset = 3;
+    }
+    else if (player->status == PLAYER_TRANSFORMING) {
+        xOffset %= 32;
+        xOffset /= 8;
+        if (!player->roombaTimeLeft) xOffset = 3 - xOffset;
+    }
+    else if (player->status != PLAYER_DYING) {
         xOffset %= 32;
         xOffset /= 4;
     }
     if (player->status == PLAYER_WALKING) xOffset = 0;
     xOffset *= PlayerFrameSize;
 
-    int yOffset;
+    int yOffset = 0;
     switch (player->status) {
     case PLAYER_DYING:
     case PLAYER_IDLE: yOffset = 0; break;
     case PLAYER_WALKING: yOffset = PlayerFrameSize; break;
     case PLAYER_SHOOTING: yOffset = PlayerFrameSize * 2; break;
+    case PLAYER_ROOMBA:
+    case PLAYER_TRANSFORMING: yOffset = PlayerFrameSize * 3; break;
     }
 
     if (player->status == PLAYER_WALKING) {
@@ -169,7 +193,7 @@ void hitPlayer(Player * player, Point enemy_coord, int damage){
 
         //Evasion
         int chance = RandNum(0, 100);
-        if(chance > player->stat.evasion)
+        if (chance > player->stat.evasion)
             player->stat.health -= damage;
     }
 }

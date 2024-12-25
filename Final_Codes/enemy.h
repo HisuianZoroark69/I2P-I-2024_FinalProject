@@ -26,7 +26,8 @@ typedef struct _enemy{
     Point coord;
     int speed;
     int health;
-    
+    int damage;
+
     EnemyStatus status;
 
     //The rate of items work as follow:

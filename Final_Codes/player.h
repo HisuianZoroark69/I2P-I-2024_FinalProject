@@ -8,8 +8,10 @@
 #include "utility.h"
 #include "map.h"
 
+#define ROOMBA_TRANSFORM_TIME 32
+
 typedef enum {
-    PLAYER_IDLE, PLAYER_WALKING, PLAYER_SHOOTING, PLAYER_DYING, PLAYER_ROOMBA
+    PLAYER_IDLE, PLAYER_WALKING, PLAYER_SHOOTING, PLAYER_DYING, PLAYER_TRANSFORMING, PLAYER_ROOMBA
 } PLAYER_STATUS;
 
 typedef struct _PlayerStat {
@@ -24,6 +26,7 @@ typedef struct _Player{
     Point coord; // coordinate of the player
     double direction; //Radian
     PlayerStat stat;
+    int roombaTimeLeft;
     
     ALLEGRO_BITMAP* image;
     ALLEGRO_BITMAP* death;
@@ -40,7 +43,7 @@ Player create_player(char * path, char* death,int frameSize, int row, int col, P
 void update_player(Player * player, Map * map, int isWeaponShooting);
 void draw_player(Player * player, Point cam);
 void delete_player(Player * player);
-void change_status(Player* player, PLAYER_STATUS status);
+void change_player_status(Player* player, PLAYER_STATUS status);
 void hitPlayer(Player * player, Point enemy_coord, int damage);
 
 #endif w/* player_h */

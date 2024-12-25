@@ -57,7 +57,7 @@ static void init(void){
     coinIconImg = al_load_bitmap("Assets/coin_icon.png");
     change_bgm("Assets/audio/game_bgm.mp3");
     
-    timeLimit = currentLevel * 5 * FPS;
+    timeLimit = (5 + currentLevel * 5) * FPS;
 }
 
 void UpdateCamera() {
@@ -83,7 +83,7 @@ static void update(void){
     update_item_list(itemList, (ItemParam){&player, &upgradePoints});
     UpdateCamera();
     updateEnemyList(enemyList, &map, &player, itemList);
-    if (player.status != PLAYER_ROOMBA) {
+    if (player.status != PLAYER_ROOMBA && player.status != PLAYER_TRANSFORMING) {
         update_weapon(&weapon, bulletList, player.coord, Camera);
     }
     updateBulletList(bulletList, enemyList, &map);
@@ -128,7 +128,7 @@ static void draw(void){
     drawBulletList(bulletList, Camera);
     draw_player(&player, Camera);
 
-    if (player.status != PLAYER_ROOMBA && player.status != PLAYER_DYING) {
+    if (player.status != PLAYER_ROOMBA && player.status != PLAYER_TRANSFORMING && player.status != PLAYER_DYING) {
         draw_weapon(&weapon, player.coord, Camera);
     }
     draw_item_list(itemList, &Camera);

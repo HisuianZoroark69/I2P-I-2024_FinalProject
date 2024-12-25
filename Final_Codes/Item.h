@@ -6,7 +6,7 @@
 #include "player.h"
 
 typedef enum _ItemType {
-	Coin, ItemTypeCount
+	Coin, Potion, ItemTypeCount
 }ItemType;
 
 typedef enum _ItemState {

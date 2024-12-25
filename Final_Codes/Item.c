@@ -2,15 +2,18 @@
 #include <stdlib.h>
 
 static ALLEGRO_BITMAP* coin_img;
+static ALLEGRO_BITMAP* blue_coin_img;
 
 void init_item()
 {
 	coin_img = al_load_bitmap("Assets/coins.png");
+	blue_coin_img = al_load_bitmap("Assets/BlueCoin.png");
 }
 
 void terminate_item()
 {
 	al_destroy_bitmap(coin_img);
+	al_destroy_bitmap(blue_coin_img);
 }
 
 Item create_item(ItemType type, Point coord)
@@ -20,6 +23,12 @@ Item create_item(ItemType type, Point coord)
 	item.type = type;
 	if (type == Coin) {
 		item.image = coin_img;
+		item.frameSize = 16;
+		item.rect = (RecArea){ coord.x, coord.y, TILE_SIZE, TILE_SIZE };
+		item.state = Idle;
+	}
+	if (type == Potion) {
+		item.image = blue_coin_img;
 		item.frameSize = 16;
 		item.rect = (RecArea){ coord.x, coord.y, TILE_SIZE, TILE_SIZE };
 		item.state = Idle;
@@ -48,6 +57,12 @@ bool update_item(Item* item, ItemParam* param)
 	if (item->type == Coin) {
 		(*(param->points))++;
 	}
+	if (item->type == Potion) {
+		if (param->player->roombaTimeLeft == 0) param->player->roombaTimeLeft += ROOMBA_TRANSFORM_TIME; //transform time
+		param->player->roombaTimeLeft += FPS * 10;
+		if(param->player->status != PLAYER_ROOMBA)
+			change_player_status(param->player, PLAYER_TRANSFORMING);
+	}
 	return false;
 }
 
@@ -55,7 +70,7 @@ void draw_item(Item* item, const Point* camera)
 {
 	int dx = item->rect.x - camera->x;
 	int dy = item->rect.y - camera->y;
-	if (item->type == Coin) {
+	if (item->type == Coin || item->type == Potion) {
 		int xOffset = item->animation_tick / 8;
 		int yOffset;
 		switch (item->state) {
