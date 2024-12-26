@@ -22,8 +22,8 @@ static void init(void) {
     font = al_load_font("Assets/YouDiedFont.otf", 40, 0);
 
     //Level up prize
-    points += 3;
-    currentStat.health += 3;
+    //points += 3;
+    //currentStat.health += 3;
 }
 
 static void update(void) {

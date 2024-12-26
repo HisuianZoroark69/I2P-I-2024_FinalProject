@@ -3,7 +3,7 @@
 #include "menu_scene.h"
 #include "game_scene.h"
 #include "setting_scene.h"
-#include "loading_scene.h"
+#include "leaderboard_scene.h"
 #include "utility.h"
 #include "UI.h"
 #include "game.h"
@@ -11,11 +11,13 @@
 
 static Button settingButton;
 static Button startButton;
+static Button leaderboard;
 static PlayerStat defaultStat;
 
 static void init(void) {
-    settingButton = button_create(SCREEN_W / 2 - 200, 600, 400, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
-    startButton = button_create(SCREEN_W / 2 - 200 , 450, 400, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
+    settingButton = button_create(SCREEN_W / 2 - 200, 650, 400, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
+    leaderboard = button_create(SCREEN_W / 2 - 200 , 525, 400, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
+    startButton = button_create(SCREEN_W / 2 - 200, 405, 400, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
     change_bgm("Assets/audio/menu_bgm.mp3");
     defaultStat.atk = 10;
     defaultStat.atkSpd = 30;
@@ -27,11 +29,15 @@ static void init(void) {
 static void update(void) {
     update_button(&settingButton);
     update_button(&startButton); 
+    update_button(&leaderboard);
     if (settingButton.hovered && mouseButtonUp & 1) {
         change_scene(create_setting_scene());
     }
     if (startButton.hovered && mouseButtonUp & 1) {
         change_scene(create_game_scene(1, 0, defaultStat));
+    }
+    if (leaderboard.hovered && mouseButtonUp & 1) {
+        change_scene(create_leaderboard_scene(0));
     }
 }
 
@@ -55,14 +61,14 @@ static void draw(void) {
     );
 
     draw_button(startButton, "START");
-    // button
+    draw_button(leaderboard, "LEADERBOARD");
     draw_button(settingButton, "SETTING");
-    // button text
 }
 
 static void destroy(void) {
     destroy_button(&settingButton);
     destroy_button(&startButton);
+    destroy_button(&leaderboard);
 }
 
 

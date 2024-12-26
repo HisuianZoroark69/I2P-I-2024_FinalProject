@@ -3,6 +3,6 @@
 
 #include "utility.h"
 
-Scene create_gameover_scene(ALLEGRO_BITMAP* background);
+Scene create_gameover_scene(ALLEGRO_BITMAP* background, int currentLevel);
 
 #endif 

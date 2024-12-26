@@ -1,8 +1,8 @@
 #include <string.h>
 #include "game_scene.h"
 #include "menu_scene.h"
-#include "loading_scene.h"
 #include "gameover_scene.h"
+#include "level_change_scene.h"
 #include "game.h"
 #include "player.h"
 #include "map.h"
@@ -141,7 +141,7 @@ static void draw(void){
     drawUI();
     drawTimeLimit();
     if (player.status == PLAYER_DYING && player.animation_tick >= 60) {
-        change_scene(create_gameover_scene(al_get_backbuffer(al_get_current_display())));
+        change_scene(create_gameover_scene(al_get_backbuffer(al_get_current_display()), currentLevel));
     }
 }
 

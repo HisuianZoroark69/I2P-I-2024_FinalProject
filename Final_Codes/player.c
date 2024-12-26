@@ -162,6 +162,7 @@ void draw_player(Player * player, Point cam){
 
 void delete_player(Player * player){
     al_destroy_bitmap(player->image);
+    al_destroy_bitmap(player->death);
 }
 
 
