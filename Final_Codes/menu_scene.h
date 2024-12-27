@@ -3,6 +3,8 @@
 
 #include "utility.h"
 
+
+//extern PlayerStat defaultStat;
 Scene create_menu_scene(void);
 
 #endif /* menu_scene_h */

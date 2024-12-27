@@ -33,6 +33,7 @@ static bool isCollision(Point enemyCoord, Map* map, enemyNode* dummyhead);
 // Return true if player collide with enemy
 static bool playerCollision(Point enemyCoord, Point playerCoord);
 
+bool StopSpawning;
 
 void initEnemy(void){
     // For memory efficiency, we load the image once
@@ -46,6 +47,7 @@ void initEnemy(void){
     if(!slimeBitmap){
         game_abort("Error Load Bitmap with path : %s", slimePath);
     }
+    StopSpawning = false;
 }
 
 Enemy createEnemy(int row, int col, enemyType type){
@@ -69,8 +71,8 @@ Enemy createEnemy(int row, int col, enemyType type){
             enemy.type = slime;
             enemy.speed = 2;
             enemy.image = slimeBitmap;
-            enemy.itemRate[Potion] = 5;
-            enemy.itemRate[Coin] = 55;
+            enemy.itemRate[Potion] = 50;
+            enemy.itemRate[Coin] = 40;
             enemy.damage = 1;
             enemy.death_sfx = NULL;
             break;
@@ -80,8 +82,8 @@ Enemy createEnemy(int row, int col, enemyType type){
             enemy.type = c4slime;
             enemy.speed = EnemyBaseHP / 10;  // Speed increase with hp
             enemy.image = slimeBitmap;
-            enemy.itemRate[Potion] = 10;
-            enemy.itemRate[Coin] = 60;
+            enemy.itemRate[Potion] = 60;
+            enemy.itemRate[Coin] = 50;
             enemy.damage = 5;
             enemy.death_sfx = explode_sfx;
             break;
@@ -295,9 +297,8 @@ void updateEnemyList(enemyNode* dummyhead, Map* map, Player* player, ItemNode* i
     enemyNode* cur = dummyhead->next;
     enemyNode* prev = dummyhead;
 
-    EnemySpawnCD--;
-    if (EnemySpawnCD <= 0) {
-        EnemySpawnCD = MaxEnemySpawnCD;
+    EnemySpawnCD = (EnemySpawnCD + 1) % MaxEnemySpawnCD;
+    if (EnemySpawnCD == 0 && !StopSpawning) {
         int nx, ny;
         do {
             nx = RandNum(0, map->col);
@@ -310,21 +311,24 @@ void updateEnemyList(enemyNode* dummyhead, Map* map, Player* player, ItemNode* i
     while(cur != NULL){
         bool shouldDelete = updateEnemy(&cur->enemy, dummyhead, map, player);
         if(shouldDelete){
-            //Spawn item, the item spawned is the one the rate is smaller but closest to
-            int rate = RandNum(0, 100);
-            int distance = 100;
-            ItemType itemType = ItemTypeCount;
-            for (int i = 0; i < ItemTypeCount; i++) {
-                int curItemRate = cur->enemy.itemRate[i];
-                int comp = curItemRate - rate;
-                if (rate < curItemRate && comp < distance && comp >= 0) {
-                    itemType = i;
-                    distance = rate - curItemRate;
+            //Will not spawn item if enemy is killed by the system
+            if (!StopSpawning) {
+                //Spawn item, the item spawned is the one the rate is smaller but closest to
+                int rate = RandNum(0, 100);
+                int distance = 100;
+                ItemType itemType = ItemTypeCount;
+                for (int i = 0; i < ItemTypeCount; i++) {
+                    int curItemRate = cur->enemy.itemRate[i];
+                    int comp = curItemRate - rate;
+                    if (rate < curItemRate && comp < distance && comp >= 0) {
+                        itemType = i;
+                        distance = comp;
+                    }
+                    game_log("rate: %2d comp %2d", rate, comp);
                 }
+                game_log("item type: %d", itemType);
+                insert_item_list(itemList, create_item(itemType, cur->enemy.coord));
             }
-            game_log("Current rate: %2d, distance: %2d, item type: %d", rate, distance, itemType);
-            insert_item_list(itemList, create_item(itemType, cur->enemy.coord));
-
             //Delete the enemy
             prev->next = cur->next;
             destroyEnemy(&cur->enemy);
@@ -344,6 +348,16 @@ void drawEnemyList(enemyNode * dummyhead, Point cam){
     
     while(cur != NULL){
         drawEnemy(&cur->enemy, cam);
+        cur = cur->next;
+    }
+}
+
+void killAllEnemyList(enemyNode* dummyhead) {
+    enemyNode* cur = dummyhead->next;
+    StopSpawning = true;
+    while (cur != NULL) {
+        cur->enemy.health = 0;
+        cur->enemy.status = DYING;
         cur = cur->next;
     }
 }

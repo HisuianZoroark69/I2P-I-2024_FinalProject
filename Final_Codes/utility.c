@@ -181,6 +181,7 @@ uint32_t pcg32_random_r(pcg32_random_t* rng)
 }
 
 void RandomInit() {
+    srand(time(NULL));
     rng.state = rand();
     rng.inc = rand();
 }

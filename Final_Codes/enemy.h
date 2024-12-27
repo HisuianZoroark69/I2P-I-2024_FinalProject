@@ -70,6 +70,7 @@ enemyNode * createEnemyList(int baseHP);
 void insertEnemyList(enemyNode * dummyhead, Enemy _enemy);
 void updateEnemyList(enemyNode * dummyhead, Map * map, Player * player, ItemNode* itemList);
 void drawEnemyList(enemyNode * dummyhead, Point cam);
+void killAllEnemyList(enemyNode* dummyhead);
 void destroyEnemyList(enemyNode * dummyhead);
 
 void initEnemy(void);

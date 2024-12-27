@@ -9,8 +9,10 @@
 static ALLEGRO_FONT* font;
 Button nextLevelButton;
 Button addStatButtons[statCount];
+int prices[statCount];
 
 PlayerStat currentStat;
+extern PlayerStat defaultStat;
 int level;
 int points;
 
@@ -30,34 +32,40 @@ static void init(void) {
 static void update(void) {
     update_button(&nextLevelButton);
     for (int i = 0; i < statCount; i++) {
-        update_button(&addStatButtons[i]);
+        if(points >= prices[i])
+            update_button(&addStatButtons[i]);
     }
     if (nextLevelButton.hovered && mouseButtonUp & 1) {
         change_scene(create_game_scene(level, points, currentStat));
     }
+    //update prices
+    prices[0] = 1;
+    prices[1] = currentStat.atk - defaultStat.atk + 2;
+    prices[2] = defaultStat.atkSpd - currentStat.atkSpd + 1;
+    prices[3] = currentStat.speed - defaultStat.speed + 1;
+    prices[4] = currentStat.evasion - defaultStat.evasion + 5;
 
     //Stat increase
-    if (points <= 0) return;
-    if (addStatButtons[0].hovered && mouseButtonUp & 1) {
+    if (addStatButtons[0].hovered && mouseButtonUp & 1 && points >= prices[0]) {
         currentStat.health += 1;
         points--;
     }
-    if (addStatButtons[1].hovered && mouseButtonUp & 1) {
+    if (addStatButtons[1].hovered && mouseButtonUp & 1 && points >= prices[1]) {
         currentStat.atk += 2;
-        points--;
+        points -= currentStat.atk - defaultStat.atk;
     }
-    if (addStatButtons[2].hovered && mouseButtonUp & 1 && currentStat.atkSpd > 2) {
+    if (addStatButtons[2].hovered && mouseButtonUp & 1 && currentStat.atkSpd > 2 && points >= prices[2]) {
         currentStat.atkSpd -= 1;
-        points--;
+        points -= defaultStat.atkSpd - currentStat.atkSpd;
     }
-    if (addStatButtons[3].hovered && mouseButtonUp & 1 && currentStat.speed < 10) {
-        currentStat.speed *= 1.15;
+    if (addStatButtons[3].hovered && mouseButtonUp & 1 && currentStat.speed < 10 && points >= prices[3]) {
+        currentStat.speed += 1;
         if (currentStat.speed >= 10) currentStat.speed = 10;
-        points--;
+        points -= currentStat.speed - defaultStat.speed;
     }
-    if (addStatButtons[4].hovered && mouseButtonUp & 1 && currentStat.evasion < 50) {
+    if (addStatButtons[4].hovered && mouseButtonUp & 1 && currentStat.evasion < 50 && points >= prices[4]) {
         currentStat.evasion += 5;
-        points--;
+        points -= currentStat.evasion - defaultStat.evasion;
     }
 }
 
@@ -74,6 +82,7 @@ static void draw(void) {
         if (i == 2 && currentStat.atkSpd <= 2) continue;
         if (i == 3 && currentStat.speed >= 10) continue;
         if (i == 4 && currentStat.evasion >= 50) continue;
+        if (points < prices[i]) continue;
         draw_button(addStatButtons[i], "+");
     }
     draw_button(nextLevelButton, "Next level");

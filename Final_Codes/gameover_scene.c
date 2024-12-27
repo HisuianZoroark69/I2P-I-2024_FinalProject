@@ -27,6 +27,7 @@ static void init(void) {
     getMinMaxScore(&min, &max);
     newHighscore = curLevel > max;
     canAddHighscore = curLevel > min;
+    change_bgm("Assets/audio/losing_music.ogg", true);
 }
 
 static void update(void) {

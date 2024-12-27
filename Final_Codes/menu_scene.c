@@ -12,7 +12,7 @@
 static Button settingButton;
 static Button startButton;
 static Button leaderboard;
-static PlayerStat defaultStat;
+PlayerStat defaultStat;
 
 static void init(void) {
     settingButton = button_create(SCREEN_W / 2 - 200, 650, 400, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");

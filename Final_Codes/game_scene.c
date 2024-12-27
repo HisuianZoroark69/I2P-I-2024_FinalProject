@@ -77,8 +77,8 @@ static void update(void){
     if(player.status != PLAYER_DYING) timeLimit--;
     //Grace period reached
     if (timeLimit == Grace_Period * FPS) {
-        destroyBulletList(bulletList);
-        destroyEnemyList(enemyList);
+        //destroyBulletList(bulletList);
+        killAllEnemyList(enemyList);
     }
     if (timeLimit <= 0) {
         change_scene(create_level_change_scene(currentLevel + 1, upgradePoints, player.stat));
@@ -88,13 +88,11 @@ static void update(void){
     update_player(&player, &map, weapon.cooldown_counter + mouseState.buttons);
     update_item_list(itemList, (ItemParam){&player, &upgradePoints});
     UpdateCamera();
-    if (player.status != PLAYER_ROOMBA && player.status != PLAYER_TRANSFORMING) {
+    if (player.status != PLAYER_ROOMBA && player.status != PLAYER_TRANSFORMING && timeLimit > Grace_Period * FPS) {
         update_weapon(&weapon, bulletList, player.coord, Camera);
     }
-    if (timeLimit > Grace_Period * FPS) {
-        updateEnemyList(enemyList, &map, &player, itemList);
-        updateBulletList(bulletList, enemyList, &map);
-    }
+    updateEnemyList(enemyList, &map, &player, itemList);
+    updateBulletList(bulletList, enemyList, &map);
     update_map(&map, player.coord, &upgradePoints);
     
 }
@@ -132,10 +130,8 @@ static void draw(void){
     
     // Draw
     draw_map(&map, Camera);
-    if (timeLimit > Grace_Period * FPS) {
-        drawEnemyList(enemyList, Camera);
-        drawBulletList(bulletList, Camera);
-    }
+    drawEnemyList(enemyList, Camera);
+    drawBulletList(bulletList, Camera);
     draw_player(&player, Camera);
 
     if (player.status != PLAYER_ROOMBA && player.status != PLAYER_TRANSFORMING && player.status != PLAYER_DYING) {
@@ -161,6 +157,8 @@ static void destroy(void){
     delete_player(&player);
     delete_weapon(&weapon);
     destroy_map(&map);
+    destroyEnemyList(enemyList);
+    destroyBulletList(bulletList);
     destroy_item_list(itemList);
     terminateEnemy();
     terminate_item();
