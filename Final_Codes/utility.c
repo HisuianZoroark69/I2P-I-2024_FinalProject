@@ -21,11 +21,12 @@ char currentAudio[1000];
 const int TILE_SIZE = 64;
 
 ALLEGRO_SAMPLE* BGM = NULL;
+ALLEGRO_SAMPLE* nextBGM = NULL;
 float SFX_VOLUME = 0.5f;
 float BGM_VOLUME = 0.5f;
 
 int audioFade;
-int tick;
+int audioTick;
 
 ALLEGRO_FONT* TITLE_FONT;
 ALLEGRO_FONT* P1_FONT;
@@ -34,17 +35,23 @@ ALLEGRO_FONT* P3_FONT;
 
 pcg32_random_t rng;
 
-void load_and_play_bgm(const char* path) {
-    if (BGM) {
-        al_destroy_sample(BGM);
-        BGM = NULL;
-    }
+//Preventing lag when audio load while fading, load the next audio first before fading
+void load_next_bgm(const char* path) {
 
-    BGM = al_load_sample(path);
-    if (!BGM) {
+    nextBGM = al_load_sample(path);
+    if (!nextBGM) {
         game_log("No BGM File found [%s], no sound will be played", path);
     }
     else {
+        game_log("Playing %s", path);
+    }
+}
+void play_next_bgm() {
+    if (BGM) {
+        al_destroy_sample(BGM);
+    }
+    BGM = nextBGM;
+    if(BGM) {
         al_play_sample(BGM, BGM_VOLUME, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
     }
 }
@@ -52,34 +59,36 @@ void load_and_play_bgm(const char* path) {
 void update_bgm_fade() {
     if (!audioFade) return;
     ALLEGRO_MIXER* mixer = al_get_default_mixer();
-    tick++;
-    if (tick < audioFade) { //Fade audio out
-        float gain = number_map(0, audioFade, 1, 0, tick);
+    audioTick++;
+    if (audioTick < audioFade) { //Fade audio out
+        float gain = number_map(0, audioFade, 1, 0, audioTick);
         al_set_mixer_gain(mixer, gain);
     }
-    else if (tick < audioFade * 2) {      
-        float gain = number_map(audioFade, audioFade * 2 - 1, 0, 1, tick);
+    else if (audioTick < audioFade * 2) {
+        float gain = number_map(audioFade, audioFade * 2 - 1, 0, 1, audioTick);
         al_set_mixer_gain(mixer, gain);
     }
-    if (tick == audioFade) {
-        load_and_play_bgm(currentAudio);
+    if (audioTick == audioFade) {
+        play_next_bgm();
     }
-    if (tick == audioFade * 2) {
+    if (audioTick >= audioFade * 2) {
         audioFade = 0;
-        tick = 0;
+        audioTick = 0;
     }
 }
 
 void change_bgm(char* audio_path, bool continueIfSame, int fade) {
+    audioTick = 0;
     if (continueIfSame && strcmp(currentAudio, audio_path) == 0) {
         game_log("Continue playing the bgm");
         return;
     }
     audioFade = fade;
     strcpy(currentAudio, audio_path);
+    load_next_bgm(currentAudio);
 
     if (audioFade) return; //Let update_bgm_fade handle the clean up and audio change if there's fading 
-    load_and_play_bgm(currentAudio);
+    play_next_bgm();
 }
 
 void init_Util(void){

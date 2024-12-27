@@ -14,7 +14,7 @@ ALLEGRO_MOUSE_STATE mouseState;
 int mouseButtonUp;
 //Force fade-out, fade-in when changing scene
 int sceneFade;
-int tick;
+int fadingTick;
 
 Scene current_scene;
 
@@ -102,7 +102,7 @@ void initGame(void){
         game_abort("failed to create game timer");
     gameTick = al_create_timer(1.0f / FPS);
     if(!gameTick)
-        game_abort("failed to create game tick timer");
+        game_abort("failed to create game fadingTick timer");
     
     // Register Event
     al_register_event_source(event_queue, al_get_display_event_source(gameDisplay));
@@ -121,7 +121,7 @@ void initGame(void){
     al_start_timer(gameTick);
     
     sceneFade = 0;
-    tick = 0;
+    fadingTick = 0;
     bg = al_create_bitmap(SCREEN_W, SCREEN_H);
     // Create the current scene
     change_scene(create_menu_scene(), 0);
@@ -140,29 +140,29 @@ void terminate(void){
 }
 void sceneTransition() {
     //Scene fading
-    tick++;
-    if (tick < sceneFade) {
-        int opacity = number_map(0, sceneFade, 255, 0, tick);
+    fadingTick++;
+    if (fadingTick < sceneFade) {
+        int opacity = number_map(0, sceneFade, 255, 0, fadingTick);
         al_draw_tinted_bitmap(bg, al_map_rgba(255, 255, 255, opacity), 0, 0, 0);
         al_flip_display();
     }
-    else if (tick < sceneFade * 2) {
-        int opacity = number_map(sceneFade + 1, sceneFade * 2, 0, 255, tick);
+    else if (fadingTick < sceneFade * 2) {
+        int opacity = number_map(sceneFade + 1, sceneFade * 2, 0, 255, fadingTick);
         al_draw_tinted_bitmap(bg, al_map_rgba(255, 255, 255, opacity), 0, 0, 0);
         al_flip_display();
     }
     //Done fade out, draw once to fade in
-    if (tick == sceneFade) {
+    if (fadingTick == sceneFade) {
         al_set_target_bitmap(bg);
         al_clear_to_color(al_map_rgba(0, 0, 0, 0));
-        //current_scene.update();
+        current_scene.update();
         current_scene.draw();
         al_set_target_backbuffer(gameDisplay);
     }
     //Done scene fading, resetting
-    else if (tick == sceneFade * 2) {
+    else if (fadingTick == sceneFade * 2) {
         sceneFade = 0;
-        tick = 0;
+        fadingTick = 0;
     }
 }
 // Game Event Loop

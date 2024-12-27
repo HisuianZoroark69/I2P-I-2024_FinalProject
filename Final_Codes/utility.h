@@ -6,7 +6,7 @@
 #include <allegro5/allegro_acodec.h>
 
 #define PI 3.14159265358979323846
-#define AUDIO_FADE_TIME 0
+#define AUDIO_FADE_TIME FPS
 
 /*
      [LOG_ENABLE]
