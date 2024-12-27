@@ -12,6 +12,7 @@
 #include "Item.h"
 
 #include <math.h>
+#define Grace_Period 3
 
 Player player; // Player
 PlayerStat pStat;
@@ -55,9 +56,9 @@ static void init(void){
     game_log("coord x:%d \n coords y:%d \n", map.Spawn.x, map.Spawn.y);
     healthImg = al_load_bitmap("Assets/heart.png");
     coinIconImg = al_load_bitmap("Assets/coin_icon.png");
-    change_bgm("Assets/audio/game_bgm.mp3");
+    change_bgm("Assets/audio/game_music2.mp3", true);
     
-    timeLimit = (5 + currentLevel * 5) * FPS;
+    timeLimit = (10 + currentLevel * (5) + Grace_Period) * FPS; //3 seconds grace period to pick up coins
 }
 
 void UpdateCamera() {
@@ -74,6 +75,11 @@ void UpdateCamera() {
 static void update(void){
     //Update timer
     if(player.status != PLAYER_DYING) timeLimit--;
+    //Grace period reached
+    if (timeLimit == Grace_Period * FPS) {
+        destroyBulletList(bulletList);
+        destroyEnemyList(enemyList);
+    }
     if (timeLimit <= 0) {
         change_scene(create_level_change_scene(currentLevel + 1, upgradePoints, player.stat));
         return;
@@ -82,11 +88,13 @@ static void update(void){
     update_player(&player, &map, weapon.cooldown_counter + mouseState.buttons);
     update_item_list(itemList, (ItemParam){&player, &upgradePoints});
     UpdateCamera();
-    updateEnemyList(enemyList, &map, &player, itemList);
     if (player.status != PLAYER_ROOMBA && player.status != PLAYER_TRANSFORMING) {
         update_weapon(&weapon, bulletList, player.coord, Camera);
     }
-    updateBulletList(bulletList, enemyList, &map);
+    if (timeLimit > Grace_Period * FPS) {
+        updateEnemyList(enemyList, &map, &player, itemList);
+        updateBulletList(bulletList, enemyList, &map);
+    }
     update_map(&map, player.coord, &upgradePoints);
     
 }
@@ -108,7 +116,7 @@ void drawUI() {
 
 void drawTimeLimit() {
     al_draw_textf(P3_FONT, al_map_rgb(255, 255, 255), 400, 20, 0, "Level: %d", currentLevel);
-    al_draw_textf(P3_FONT, al_map_rgb(255, 255, 255), 400, 50, 0, "Time: %d", timeLimit / FPS);
+    al_draw_textf(P3_FONT, al_map_rgb(255, 255, 255), 400, 50, 0, "Time: %d", (timeLimit - Grace_Period) / FPS);
 }
 
 static void draw(void){
@@ -124,8 +132,10 @@ static void draw(void){
     
     // Draw
     draw_map(&map, Camera);
-    drawEnemyList(enemyList, Camera);
-    drawBulletList(bulletList, Camera);
+    if (timeLimit > Grace_Period * FPS) {
+        drawEnemyList(enemyList, Camera);
+        drawBulletList(bulletList, Camera);
+    }
     draw_player(&player, Camera);
 
     if (player.status != PLAYER_ROOMBA && player.status != PLAYER_TRANSFORMING && player.status != PLAYER_DYING) {
@@ -151,8 +161,6 @@ static void destroy(void){
     delete_player(&player);
     delete_weapon(&weapon);
     destroy_map(&map);
-    destroyBulletList(bulletList);
-    destroyEnemyList(enemyList);
     destroy_item_list(itemList);
     terminateEnemy();
     terminate_item();

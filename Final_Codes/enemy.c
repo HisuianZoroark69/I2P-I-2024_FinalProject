@@ -14,6 +14,7 @@
 
 ALLEGRO_BITMAP * slimeBitmap;
 ALLEGRO_BITMAP* explode;
+ALLEGRO_SAMPLE* explode_sfx;
 int MaxEnemySpawnCD = 60;
 int EnemySpawnCD = 60;
 int EnemyBaseHP;
@@ -41,6 +42,7 @@ void initEnemy(void){
     char * slimePath = "Assets/Slime.png";
     slimeBitmap = al_load_bitmap(slimePath);
     explode = al_load_bitmap("Assets/explode.png");
+    explode_sfx = al_load_sample("Assets/audio/explode_sfx.mp3");
     if(!slimeBitmap){
         game_abort("Error Load Bitmap with path : %s", slimePath);
     }
@@ -70,6 +72,7 @@ Enemy createEnemy(int row, int col, enemyType type){
             enemy.itemRate[Potion] = 5;
             enemy.itemRate[Coin] = 55;
             enemy.damage = 1;
+            enemy.death_sfx = NULL;
             break;
         // Insert more here to have more enemy variant
         case c4slime:
@@ -80,6 +83,7 @@ Enemy createEnemy(int row, int col, enemyType type){
             enemy.itemRate[Potion] = 10;
             enemy.itemRate[Coin] = 60;
             enemy.damage = 5;
+            enemy.death_sfx = explode_sfx;
             break;
         default:
             enemy.health = EnemyBaseHP;
@@ -102,6 +106,10 @@ bool updateEnemy(Enemy* enemy, enemyNode* dummyhead, Map* map, Player* player) {
             Configure the death animation tick for dying animation,
             Return true when the enemy is dead
         */ 
+        if (!enemy->death_sfx_played && enemy->death_sfx != NULL) {
+            enemy->death_sfx_played = true;
+            al_play_sample(enemy->death_sfx, SFX_VOLUME, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+        }
         enemy->death_animation_tick = (enemy->death_animation_tick + 1);
         if (enemy->death_animation_tick >= 8 && enemy->type == slime) return true;
         if (enemy->death_animation_tick >= 60) return true;
@@ -347,6 +355,7 @@ void destroyEnemyList(enemyNode * dummyhead){
         destroyEnemy(&del->enemy);
         free(del);
     }
+    //dummyhead->next = NULL;
 }
 
 static bool validLine(Map * map, Point p0, Point p1){

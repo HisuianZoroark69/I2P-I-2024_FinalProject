@@ -102,7 +102,7 @@ typedef struct Scene_{
 typedef struct { uint64_t state;  uint64_t inc; } pcg32_random_t;
 
 // Change Background Music
-void change_bgm(char* audio_path);
+void change_bgm(char* audio_path, bool continueIfSame);
 
 // Utility Initialization
 void init_Util(void);

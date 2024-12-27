@@ -25,7 +25,7 @@ Player create_player(char * path, char* death, int frameSize, int row, int col, 
     if (!player.death) {
         game_abort("Error Load Bitmap with path %s", death);
     }
-
+    player.death_sfx = al_load_sample("Assets/audio/explode_sfx.mp3");
     return player;
 }
 
@@ -47,6 +47,7 @@ void update_player(Player * player, Map* map, int isWeaponShooting){
     }
     if (player->stat.health <= 0) {
         player->stat.health = 0;
+        al_play_sample(player->death_sfx, SFX_VOLUME, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
         change_player_status(player, PLAYER_DYING);
         return;
     }
@@ -163,6 +164,7 @@ void draw_player(Player * player, Point cam){
 void delete_player(Player * player){
     al_destroy_bitmap(player->image);
     al_destroy_bitmap(player->death);
+    al_destroy_sample(player->death_sfx);
 }
 
 

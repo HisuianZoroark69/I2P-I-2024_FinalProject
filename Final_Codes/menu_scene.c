@@ -18,7 +18,7 @@ static void init(void) {
     settingButton = button_create(SCREEN_W / 2 - 200, 650, 400, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
     leaderboard = button_create(SCREEN_W / 2 - 200 , 525, 400, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
     startButton = button_create(SCREEN_W / 2 - 200, 405, 400, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
-    change_bgm("Assets/audio/menu_bgm.mp3");
+    change_bgm("Assets/audio/menu_music.mp3", true);
     defaultStat.atk = 10;
     defaultStat.atkSpd = 30;
     defaultStat.evasion = 0;

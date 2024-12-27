@@ -30,6 +30,7 @@ typedef struct _Player{
     
     ALLEGRO_BITMAP* image;
     ALLEGRO_BITMAP* death;
+    ALLEGRO_SAMPLE* death_sfx;
     uint8_t animation_tick; // For animation
     
     float knockback_angle;

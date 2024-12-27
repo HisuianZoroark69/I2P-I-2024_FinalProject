@@ -21,7 +21,9 @@ typedef enum{
 
 typedef struct _enemy{
     ALLEGRO_BITMAP* image;
-    
+    ALLEGRO_SAMPLE* death_sfx;
+    int death_sfx_played;
+
     enemyType type;
     Point coord;
     int speed;

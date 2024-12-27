@@ -17,6 +17,7 @@ const int RESERVE_SAMPLES = 10;
 const char* GAME_TITLE = "NTHU-RPG Adventure";
 const char* log_file = "log.txt";
 const char* font_file = "Assets/Minecraft.ttf";
+char currentAudio[1000];
 const int TILE_SIZE = 64;
 
 ALLEGRO_SAMPLE* BGM = NULL;
@@ -30,7 +31,12 @@ ALLEGRO_FONT* P3_FONT;
 
 pcg32_random_t rng;
 
-void change_bgm(char* audio_path) {
+void change_bgm(char* audio_path, bool continueIfSame) {
+    if (continueIfSame && strcmp(currentAudio, audio_path) == 0) {
+        game_log("Continue playing the bgm");
+        return;
+    }
+    strcpy(currentAudio, audio_path);
     if (BGM) {
         al_destroy_sample(BGM);
         BGM = NULL;
@@ -40,7 +46,7 @@ void change_bgm(char* audio_path) {
     if (!BGM) {
         game_log("No BGM File found [%s], no sound will be played", audio_path);
     }
-    else {
+    else {  
         al_play_sample(BGM, BGM_VOLUME, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
     }
 }

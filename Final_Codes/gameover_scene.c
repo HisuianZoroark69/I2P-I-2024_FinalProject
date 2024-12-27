@@ -22,7 +22,7 @@ static void init(void) {
     shikaFont = al_load_font("Assets/YouDiedFont.otf", 32, 0);
     mainmenu = button_create(SCREEN_W / 2 - 150, 600, 300, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
     highscore = button_create(SCREEN_W/2 - 150, 450, 300, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
-    change_bgm("None");
+    change_bgm("None", true);
     int min, max;
     getMinMaxScore(&min, &max);
     newHighscore = curLevel > max;
@@ -47,7 +47,7 @@ static void draw(void) {
     int ShikaOpacity = number_map(120, 240, 0, 200, tick);
     al_draw_tinted_bitmap(bg, al_map_rgba(255, 255, 255, BgOpacity), 0, 0, 0);
     al_draw_text(youDiedFont, al_map_rgba(201, 8, 3, YouDiedOpacity), SCREEN_W / 2, 200, ALLEGRO_ALIGN_CENTER, "YOU DIER");
-    al_draw_text(shikaFont, al_map_rgba(255, 255, 255, ShikaOpacity), SCREEN_W / 2, 300, ALLEGRO_ALIGN_CENTER, newHighscore ? "HIGH SCORE" : "~GGWP~");
+    al_draw_text(shikaFont, al_map_rgba(255, 255, 255, ShikaOpacity), SCREEN_W / 2, 300, ALLEGRO_ALIGN_CENTER, newHighscore ? "HIGH SCORE" : "Nice try");
     if (tick > 240) {
         draw_button(mainmenu, "Main menu");
         if (canAddHighscore)
