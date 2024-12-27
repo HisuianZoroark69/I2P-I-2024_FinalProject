@@ -25,7 +25,7 @@ static void init(void) {
 
     //Level up prize
     points += 1;
-    change_bgm("Assets/audio/game_music2.mp3", true);
+    change_bgm("Assets/audio/game_music2.mp3", true, AUDIO_FADE_TIME);
     //currentStat.health += 3;
 }
 
@@ -36,7 +36,7 @@ static void update(void) {
             update_button(&addStatButtons[i]);
     }
     if (nextLevelButton.hovered && mouseButtonUp & 1) {
-        change_scene(create_game_scene(level, points, currentStat));
+        change_scene(create_game_scene(level, points, currentStat), SCENE_FADE_TIME);
     }
     //update prices
     prices[0] = 1;

@@ -7,14 +7,27 @@ static ALLEGRO_TIMER* gameTimer;
 static ALLEGRO_TIMER* gameTick;
 static ALLEGRO_EVENT_QUEUE* event_queue;
 static ALLEGRO_EVENT event;
+ALLEGRO_BITMAP* bg;
 
 bool keyState[ALLEGRO_KEY_MAX] = { false };  // Array to track the state of each key
 ALLEGRO_MOUSE_STATE mouseState;
 int mouseButtonUp;
+//Force fade-out, fade-in when changing scene
+int sceneFade;
+int tick;
 
 Scene current_scene;
 
-void change_scene(Scene next_scene) {
+void change_scene(Scene next_scene, int fadeTime) {
+    sceneFade = fadeTime;
+    //Save the current scene before shifting
+    if (current_scene.draw && sceneFade) {
+        //Draw once to the bg bitmap
+        al_set_target_bitmap(bg);
+        al_clear_to_color(al_map_rgba(0, 0, 0, 0));
+        current_scene.draw();
+        al_set_target_backbuffer(gameDisplay);
+    }
     game_log("Change scene from %s to %s",
         current_scene.name ? current_scene.name : "NULL",
         next_scene.name ? next_scene.name : "NULL");
@@ -106,11 +119,12 @@ void initGame(void){
     // Start the timer
     al_start_timer(gameTimer);
     al_start_timer(gameTick);
-
     
-
+    sceneFade = 0;
+    tick = 0;
+    bg = al_create_bitmap(SCREEN_W, SCREEN_H);
     // Create the current scene
-    change_scene(create_menu_scene());
+    change_scene(create_menu_scene(), 0);
     game_log("Scene %s created, initializing ... ", current_scene.name);
 }
 
@@ -118,13 +132,39 @@ void initGame(void){
 void terminate(void){
     // Destroy Utility
     destroy_init();
-
+    al_destroy_bitmap(bg);
     al_destroy_display(gameDisplay);
     al_destroy_timer(gameTimer);
     al_destroy_timer(gameTick);
     al_destroy_event_queue(event_queue);
 }
-
+void sceneTransition() {
+    //Scene fading
+    tick++;
+    if (tick < sceneFade) {
+        int opacity = number_map(0, sceneFade, 255, 0, tick);
+        al_draw_tinted_bitmap(bg, al_map_rgba(255, 255, 255, opacity), 0, 0, 0);
+        al_flip_display();
+    }
+    else if (tick < sceneFade * 2) {
+        int opacity = number_map(sceneFade + 1, sceneFade * 2, 0, 255, tick);
+        al_draw_tinted_bitmap(bg, al_map_rgba(255, 255, 255, opacity), 0, 0, 0);
+        al_flip_display();
+    }
+    //Done fade out, draw once to fade in
+    if (tick == sceneFade) {
+        al_set_target_bitmap(bg);
+        al_clear_to_color(al_map_rgba(0, 0, 0, 0));
+        //current_scene.update();
+        current_scene.draw();
+        al_set_target_backbuffer(gameDisplay);
+    }
+    //Done scene fading, resetting
+    else if (tick == sceneFade * 2) {
+        sceneFade = 0;
+        tick = 0;
+    }
+}
 // Game Event Loop
 void start_loop(void){
     bool gameDone = false;
@@ -178,10 +218,18 @@ void start_loop(void){
             //Set up blender
             al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_INVERSE_ALPHA);
             al_clear_to_color(al_map_rgba(0, 0, 0, 0));
+            update_bgm_fade();
+            if (sceneFade) {
+                mouseButtonUp = 0;
+                sceneTransition();
+                redraw = false;
+                continue;
+            }
             
             // Update
             current_scene.update();
 
+            if (sceneFade) continue;//Prevent drawing the first frame of the next scene, causing subtle glitching
             // Draw
             current_scene.draw();
 

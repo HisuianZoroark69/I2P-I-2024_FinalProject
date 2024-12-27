@@ -56,7 +56,7 @@ static void init(void){
     game_log("coord x:%d \n coords y:%d \n", map.Spawn.x, map.Spawn.y);
     healthImg = al_load_bitmap("Assets/heart.png");
     coinIconImg = al_load_bitmap("Assets/coin_icon.png");
-    change_bgm("Assets/audio/game_music2.mp3", true);
+    change_bgm("Assets/audio/game_music2.mp3", true, AUDIO_FADE_TIME);
     
     timeLimit = (10 + currentLevel * (5) + Grace_Period) * FPS; //3 seconds grace period to pick up coins
 }
@@ -81,7 +81,7 @@ static void update(void){
         killAllEnemyList(enemyList);
     }
     if (timeLimit <= 0) {
-        change_scene(create_level_change_scene(currentLevel + 1, upgradePoints, player.stat));
+        change_scene(create_level_change_scene(currentLevel + 1, upgradePoints, player.stat), SCENE_FADE_TIME);
         return;
     }
 
@@ -147,7 +147,7 @@ static void draw(void){
     drawUI();
     drawTimeLimit();
     if (player.status == PLAYER_DYING && player.animation_tick >= 60) {
-        change_scene(create_gameover_scene(al_get_backbuffer(al_get_current_display()), currentLevel));
+        change_scene(create_gameover_scene(al_get_backbuffer(al_get_current_display()), currentLevel), 0);
     }
 }
 

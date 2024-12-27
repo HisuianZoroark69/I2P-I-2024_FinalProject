@@ -5,7 +5,8 @@
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
 
-# define PI 3.14159265358979323846
+#define PI 3.14159265358979323846
+#define AUDIO_FADE_TIME 0
 
 /*
      [LOG_ENABLE]
@@ -101,8 +102,10 @@ typedef struct Scene_{
 
 typedef struct { uint64_t state;  uint64_t inc; } pcg32_random_t;
 
+void update_bgm_fade();
+
 // Change Background Music
-void change_bgm(char* audio_path, bool continueIfSame);
+void change_bgm(char* audio_path, bool continueIfSame, int fade);
 
 // Utility Initialization
 void init_Util(void);

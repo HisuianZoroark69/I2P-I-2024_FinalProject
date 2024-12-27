@@ -14,7 +14,7 @@ const int FPS = 60;
 const int SCREEN_W = 800;
 const int SCREEN_H = 800;
 const int RESERVE_SAMPLES = 10;
-const char* GAME_TITLE = "NTHU-RPG Adventure";
+const char* GAME_TITLE = "Tales Saga Chronicles 3";
 const char* log_file = "log.txt";
 const char* font_file = "Assets/Minecraft.ttf";
 char currentAudio[1000];
@@ -24,6 +24,9 @@ ALLEGRO_SAMPLE* BGM = NULL;
 float SFX_VOLUME = 0.5f;
 float BGM_VOLUME = 0.5f;
 
+int audioFade;
+int tick;
+
 ALLEGRO_FONT* TITLE_FONT;
 ALLEGRO_FONT* P1_FONT;
 ALLEGRO_FONT* P2_FONT;
@@ -31,24 +34,52 @@ ALLEGRO_FONT* P3_FONT;
 
 pcg32_random_t rng;
 
-void change_bgm(char* audio_path, bool continueIfSame) {
-    if (continueIfSame && strcmp(currentAudio, audio_path) == 0) {
-        game_log("Continue playing the bgm");
-        return;
-    }
-    strcpy(currentAudio, audio_path);
+void load_and_play_bgm(const char* path) {
     if (BGM) {
         al_destroy_sample(BGM);
         BGM = NULL;
     }
 
-    BGM = al_load_sample(audio_path);
+    BGM = al_load_sample(path);
     if (!BGM) {
-        game_log("No BGM File found [%s], no sound will be played", audio_path);
+        game_log("No BGM File found [%s], no sound will be played", path);
     }
-    else {  
+    else {
         al_play_sample(BGM, BGM_VOLUME, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
     }
+}
+
+void update_bgm_fade() {
+    if (!audioFade) return;
+    ALLEGRO_MIXER* mixer = al_get_default_mixer();
+    tick++;
+    if (tick < audioFade) { //Fade audio out
+        float gain = number_map(0, audioFade, 1, 0, tick);
+        al_set_mixer_gain(mixer, gain);
+    }
+    else if (tick < audioFade * 2) {      
+        float gain = number_map(audioFade, audioFade * 2 - 1, 0, 1, tick);
+        al_set_mixer_gain(mixer, gain);
+    }
+    if (tick == audioFade) {
+        load_and_play_bgm(currentAudio);
+    }
+    if (tick == audioFade * 2) {
+        audioFade = 0;
+        tick = 0;
+    }
+}
+
+void change_bgm(char* audio_path, bool continueIfSame, int fade) {
+    if (continueIfSame && strcmp(currentAudio, audio_path) == 0) {
+        game_log("Continue playing the bgm");
+        return;
+    }
+    audioFade = fade;
+    strcpy(currentAudio, audio_path);
+
+    if (audioFade) return; //Let update_bgm_fade handle the clean up and audio change if there's fading 
+    load_and_play_bgm(currentAudio);
 }
 
 void init_Util(void){

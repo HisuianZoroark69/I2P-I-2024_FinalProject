@@ -18,7 +18,7 @@ static void init(void) {
     settingButton = button_create(SCREEN_W / 2 - 200, 650, 400, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
     leaderboard = button_create(SCREEN_W / 2 - 200 , 525, 400, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
     startButton = button_create(SCREEN_W / 2 - 200, 405, 400, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
-    change_bgm("Assets/audio/menu_music.mp3", true);
+    change_bgm("Assets/audio/menu_music.mp3", true, AUDIO_FADE_TIME);
     defaultStat.atk = 10;
     defaultStat.atkSpd = 30;
     defaultStat.evasion = 0;
@@ -31,13 +31,13 @@ static void update(void) {
     update_button(&startButton); 
     update_button(&leaderboard);
     if (settingButton.hovered && mouseButtonUp & 1) {
-        change_scene(create_setting_scene());
+        change_scene(create_setting_scene(), SCENE_FADE_TIME);
     }
     if (startButton.hovered && mouseButtonUp & 1) {
-        change_scene(create_game_scene(1, 0, defaultStat));
+        change_scene(create_game_scene(1, 0, defaultStat), SCENE_FADE_TIME);
     }
     if (leaderboard.hovered && mouseButtonUp & 1) {
-        change_scene(create_leaderboard_scene(0));
+        change_scene(create_leaderboard_scene(0), SCENE_FADE_TIME);
     }
 }
 

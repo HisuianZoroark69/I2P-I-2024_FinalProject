@@ -21,7 +21,7 @@ static void update(void) {
     update_slider(&bgmSlider);
     update_slider(&sfxSlider);
     if (mouseButtonUp & 1 && backButton.hovered == true) {
-        change_scene(create_menu_scene());
+        change_scene(create_menu_scene(), SCENE_FADE_TIME);
     }
 
 }

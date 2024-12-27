@@ -22,22 +22,22 @@ static void init(void) {
     shikaFont = al_load_font("Assets/YouDiedFont.otf", 32, 0);
     mainmenu = button_create(SCREEN_W / 2 - 150, 600, 300, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
     highscore = button_create(SCREEN_W/2 - 150, 450, 300, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
-    change_bgm("None", true);
+    change_bgm("None", true, AUDIO_FADE_TIME);
     int min, max;
     getMinMaxScore(&min, &max);
     newHighscore = curLevel > max;
     canAddHighscore = curLevel > min;
-    change_bgm("Assets/audio/losing_music.ogg", true);
+    change_bgm("Assets/audio/losing_music.ogg", true, AUDIO_FADE_TIME);
 }
 
 static void update(void) {
     update_button(&mainmenu);
     if (canAddHighscore) update_button(&highscore);
     if (mainmenu.hovered && mouseButtonUp & 1) {
-        change_scene(create_menu_scene());
+        change_scene(create_menu_scene(), SCENE_FADE_TIME);
     }
     if (highscore.hovered && mouseButtonUp & 1) {
-        change_scene(create_leaderboard_scene(curLevel));
+        change_scene(create_leaderboard_scene(curLevel), SCENE_FADE_TIME);
     }
     tick++;
 }

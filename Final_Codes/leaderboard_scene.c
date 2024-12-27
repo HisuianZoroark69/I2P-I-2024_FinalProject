@@ -120,7 +120,7 @@ void update() {
 	if (addingEntry == -1 && curLevel > levelsMin)
 		update_button(&AddEntry);
 	if (mouseButtonUp & 1 && MainMenu.hovered) {
-		change_scene(create_menu_scene());
+		change_scene(create_menu_scene(), SCENE_FADE_TIME);
 		return;
 	}
 	if (mouseButtonUp & 1 && AddEntry.hovered && addingEntry < ENTRIES_COUNT) {
