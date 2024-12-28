@@ -38,7 +38,8 @@ static void init(void){
     
     initEnemy();
     init_item();
-    
+    change_bgm("Assets/audio/game_music2.mp3", true, AUDIO_FADE_TIME);
+
     map = create_map("Assets/map0.txt", 0);
 
     player = create_player("Assets/arisu.png", "Assets/explode.png", 64, map.Spawn.x, map.Spawn.y, pStat);
@@ -57,7 +58,6 @@ static void init(void){
     game_log("coord x:%d \n coords y:%d \n", map.Spawn.x, map.Spawn.y);
     healthImg = al_load_bitmap("Assets/heart.png");
     coinIconImg = al_load_bitmap("Assets/coin_icon.png");
-    change_bgm("Assets/audio/game_music2.mp3", true, AUDIO_FADE_TIME);
     
     pause = false;
     timeLimit = (10 + currentLevel * (5) + Grace_Period) * FPS; //3 seconds grace period to pick up coins
