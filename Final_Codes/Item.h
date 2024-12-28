@@ -20,6 +20,7 @@ typedef struct _ItemParam {
 
 typedef struct _Item {
 	ALLEGRO_BITMAP* image;
+	ALLEGRO_SAMPLE* pickUpSfx;
 	ItemType type;
 	ItemState state;
 	int animation_tick;

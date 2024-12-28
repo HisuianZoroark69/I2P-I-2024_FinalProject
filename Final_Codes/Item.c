@@ -3,15 +3,21 @@
 
 static ALLEGRO_BITMAP* coin_img;
 static ALLEGRO_BITMAP* blue_coin_img;
+static ALLEGRO_SAMPLE* coin_sfx;
+static ALLEGRO_SAMPLE* blue_coin_sfx;
 
 void init_item()
 {
 	coin_img = al_load_bitmap("Assets/coins.png");
 	blue_coin_img = al_load_bitmap("Assets/BlueCoin.png");
+	coin_sfx = al_load_sample("Assets/audio/coin.mp3");
+	blue_coin_sfx = al_load_sample("Assets/audio/potion.mp3");
 }
 
 void terminate_item()
 {
+	al_destroy_sample(coin_sfx);
+	al_destroy_sample(blue_coin_sfx);
 	al_destroy_bitmap(coin_img);
 	al_destroy_bitmap(blue_coin_img);
 }
@@ -26,12 +32,14 @@ Item create_item(ItemType type, Point coord)
 		item.frameSize = 16;
 		item.rect = (RecArea){ coord.x, coord.y, TILE_SIZE, TILE_SIZE };
 		item.state = Idle;
+		item.pickUpSfx = coin_sfx;
 	}
 	if (type == Potion) {
 		item.image = blue_coin_img;
 		item.frameSize = 16;
 		item.rect = (RecArea){ coord.x, coord.y, TILE_SIZE, TILE_SIZE };
 		item.state = Idle;
+		item.pickUpSfx = blue_coin_sfx;
 	}
 	return item;
 }
@@ -54,6 +62,8 @@ bool update_item(Item* item, ItemParam* param)
 	}
 	item->state = Destroying;
 	item->animation_tick = 0;
+	if (item->pickUpSfx) al_play_sample(item->pickUpSfx, SFX_VOLUME, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+
 	if (item->type == Coin) {
 		(*(param->points))++;
 	}
