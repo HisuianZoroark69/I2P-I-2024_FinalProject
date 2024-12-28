@@ -60,7 +60,10 @@ void save_leaderboard() {
 void getMinMaxScore(int* minScore, int* maxScore) {
 	cfg = al_load_config_file(filename);
 	if (!cfg) {
+		//Initialize config file if not exist
 		cfg = al_create_config();
+		al_add_config_section(cfg, section);
+		al_save_config_file(filename, cfg);
 	}
 	read_leaderboard();
 	if (minScore != NULL) *minScore = 100;
@@ -82,6 +85,8 @@ void init() {
 	cfg = al_load_config_file(filename);
 	if (!cfg) {
 		cfg = al_create_config();
+		al_add_config_section(cfg, section);
+		al_save_config_file(filename, cfg);
 	}
 	read_leaderboard();
 
