@@ -6,7 +6,7 @@
 #include "UI.h"
 #include "game.h"
 
-static ALLEGRO_BITMAP* bg;
+static ALLEGRO_BITMAP* gameOverbg;
 static ALLEGRO_FONT* youDiedFont;
 static ALLEGRO_FONT* shikaFont;
 static Button mainmenu;
@@ -46,7 +46,7 @@ static void draw(void) {
     int YouDiedOpacity = number_map(0, 120, 0, 200, tick);
     int BgOpacity = number_map(30, 120, 255, 60, tick);
     int ShikaOpacity = number_map(120, 240, 0, 200, tick);
-    al_draw_tinted_bitmap(bg, al_map_rgba(255, 255, 255, BgOpacity), 0, 0, 0);
+    al_draw_tinted_bitmap(gameOverbg, al_map_rgba(255, 255, 255, BgOpacity), 0, 0, 0);
     al_draw_text(youDiedFont, al_map_rgba(201, 8, 3, YouDiedOpacity), SCREEN_W / 2, 200, ALLEGRO_ALIGN_CENTER, "YOU DIER");
     al_draw_text(shikaFont, al_map_rgba(255, 255, 255, ShikaOpacity), SCREEN_W / 2, 300, ALLEGRO_ALIGN_CENTER, newHighscore ? "HIGH SCORE" : "Nice try");
     if (tick > 240) {
@@ -57,7 +57,7 @@ static void draw(void) {
 }
 
 static void destroy(void) {
-    al_destroy_bitmap(bg);
+    al_destroy_bitmap(gameOverbg);
     al_destroy_font(youDiedFont);
     al_destroy_font(shikaFont);
     destroy_button(&highscore);
@@ -74,7 +74,7 @@ Scene create_gameover_scene(ALLEGRO_BITMAP* background, int currentLevel) {
     scene.draw = &draw;
     scene.update = &update;
     scene.destroy = &destroy;
-    bg = al_clone_bitmap(background);
+    gameOverbg = al_clone_bitmap(background);
     curLevel = currentLevel;
     return scene;
 }
