@@ -50,19 +50,25 @@ void update_weapon(Weapon * weapon, BulletNode * bulletList, Point playerCoord, 
 }
 
 void draw_weapon(Weapon * weapon, Point playerCoord, Point cam){
-    int dy = playerCoord.y - cam.y + (TILE_SIZE/2) + 4; // destiny y axis
+    int dy = playerCoord.y - cam.y + (TILE_SIZE * 3 / 4); // destiny y axis
     int dx = playerCoord.x - cam.x + (TILE_SIZE / 2); // destiny x axis
     float scale = TILE_SIZE / 64;
     
     if(weapon->angle < M_PI_2){
-        al_draw_scaled_rotated_bitmap( weapon->image, 11, 16, dx - TILE_SIZE / 8, dy,
+        al_draw_tinted_scaled_rotated_bitmap_region(weapon->image, 0, 0, 64, 24,
+            al_map_rgb_f(1, 1, 1), 17, 13,
+            dx - TILE_SIZE / 8, dy, scale, scale, weapon->angle, 0);
+        /*al_draw_scaled_rotated_bitmap( weapon->image, 11, 16, dx - TILE_SIZE / 8, dy,
                                        scale, scale, weapon->angle, 0
-                                      );
+                                      );*/
     }
     else{
-        al_draw_scaled_rotated_bitmap( weapon->image, 11, 16, dx + TILE_SIZE / 8, dy,
+        al_draw_tinted_scaled_rotated_bitmap_region(weapon->image, 0, 24, 64, 24,
+            al_map_rgb_f(1, 1, 1), 47, 13,
+            dx - TILE_SIZE / 8, dy, scale, scale, weapon->angle + M_PI, 0);
+        /*al_draw_scaled_rotated_bitmap( weapon->image, 11, 16, dx + TILE_SIZE / 8, dy,
                                        scale, scale, weapon->angle, 2
-                                      );
+                                      );*/
     }
 }
         
