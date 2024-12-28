@@ -17,6 +17,7 @@
 	If the key is pressed then keyState[...] will be true
 */
 extern bool keyState[ALLEGRO_KEY_MAX];
+extern bool keyStateUp[ALLEGRO_KEY_MAX];
 extern ALLEGRO_MOUSE_STATE mouseState;
 extern int mouseButtonUp;
 

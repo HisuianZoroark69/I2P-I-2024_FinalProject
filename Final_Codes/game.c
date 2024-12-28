@@ -10,6 +10,7 @@ static ALLEGRO_EVENT event;
 ALLEGRO_BITMAP* bg;
 
 bool keyState[ALLEGRO_KEY_MAX] = { false };  // Array to track the state of each key
+bool keyStateUp[ALLEGRO_KEY_MAX] = { false };
 ALLEGRO_MOUSE_STATE mouseState;
 int mouseButtonUp;
 //Force fade-out, fade-in when changing scene
@@ -198,6 +199,7 @@ void start_loop(void){
             case ALLEGRO_EVENT_KEY_UP:
                 game_log("Key %d up", event.keyboard.keycode);
                 keyState[event.keyboard.keycode] = false;
+                keyStateUp[event.keyboard.keycode] = true;
                 break;
             case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
                 game_log("Mouse %d up", event.mouse.button);
@@ -223,6 +225,7 @@ void start_loop(void){
                 mouseButtonUp = 0;
                 sceneTransition();
                 redraw = false;
+                memset(keyStateUp, 0, sizeof(keyStateUp));
                 continue;
             }
             
@@ -240,6 +243,8 @@ void start_loop(void){
             al_flip_display();
             
             redraw = false;
+            memset(keyStateUp, 0, sizeof(keyStateUp));
+
         }
     }
     

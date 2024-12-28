@@ -32,6 +32,7 @@ ALLEGRO_BITMAP* coinIconImg;
 
 int currentLevel, timeLimit;
 int upgradePoints;
+bool pause;
 
 static void init(void){
     
@@ -58,6 +59,7 @@ static void init(void){
     coinIconImg = al_load_bitmap("Assets/coin_icon.png");
     change_bgm("Assets/audio/game_music2.mp3", true, AUDIO_FADE_TIME);
     
+    pause = false;
     timeLimit = (10 + currentLevel * (5) + Grace_Period) * FPS; //3 seconds grace period to pick up coins
 }
 
@@ -73,6 +75,18 @@ void UpdateCamera() {
 }
 
 static void update(void){
+    if (pause) {
+        if (keyStateUp[ALLEGRO_KEY_ESCAPE]) {
+            pause = false;
+            al_set_mixer_gain(al_get_default_mixer(), 1);
+        }
+        return;
+    }
+    if (keyStateUp[ALLEGRO_KEY_ESCAPE]) {
+        pause = true;
+        al_set_mixer_gain(al_get_default_mixer(), 0.25);
+        return;
+    }
     //Update timer
     if(player.status != PLAYER_DYING) timeLimit--;
     //Grace period reached
@@ -127,7 +141,12 @@ static void draw(void){
 
         Hint: Just copy from the [TODO HACKATHON 1-3]
     */
-    
+    if (pause) {
+        al_draw_text(P1_FONT, al_map_rgb_f(1,1,1), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER,
+            "Press [ESC] to continue.");
+        return;
+    }
+
     // Draw
     draw_map(&map, Camera);
     drawEnemyList(enemyList, Camera);
