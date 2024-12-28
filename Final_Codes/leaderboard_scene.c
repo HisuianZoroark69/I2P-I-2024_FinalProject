@@ -60,7 +60,10 @@ void save_leaderboard() {
 void getMinMaxScore(int* minScore, int* maxScore) {
 	cfg = al_load_config_file(filename);
 	if (!cfg) {
+		//Initialize config file if not exist
 		cfg = al_create_config();
+		al_add_config_section(cfg, section);
+		al_save_config_file(filename, cfg);
 	}
 	read_leaderboard();
 	if (minScore != NULL) *minScore = 100;
@@ -82,6 +85,8 @@ void init() {
 	cfg = al_load_config_file(filename);
 	if (!cfg) {
 		cfg = al_create_config();
+		al_add_config_section(cfg, section);
+		al_save_config_file(filename, cfg);
 	}
 	read_leaderboard();
 
@@ -100,7 +105,7 @@ void updateKeyboard() {
 	if (!al_get_next_event(keyboard, &e)) return;
 	if (e.type != ALLEGRO_EVENT_KEY_CHAR) return;
 	if (addingEntry == -1 || addingEntry == ENTRIES_COUNT) return;
-	if (e.keyboard.keycode == ALLEGRO_KEY_ENTER || addingCharPos > 8) {
+	if (e.keyboard.keycode == ALLEGRO_KEY_ENTER) {
 		addingEntry = ENTRIES_COUNT; // entry added
 		addingCharPos = 0;
 		save_leaderboard();
@@ -112,6 +117,7 @@ void updateKeyboard() {
 		names[addingEntry][addingCharPos] = 0;
 		return;
 	}
+	if (addingCharPos > 8) return;
 	names[addingEntry][addingCharPos++] = e.keyboard.unichar;
 }
 void update() {

@@ -46,7 +46,7 @@ static void init(void){
     bulletList = createBulletList();
     itemList = create_item_list();
 
-    weapon = create_weapon("Assets/guns.png", "Assets/yellow_bullet.png", pStat.atkSpd, 8, pStat.atk);
+    weapon = create_weapon("Assets/railgun.png", "Assets/blue_bullet.png", pStat.atkSpd, 8, pStat.atk);
     
     for(int i=0; i<map.EnemySpawnSize; i++){
         Enemy enemy = createEnemy(map.EnemySpawn[i].x, map.EnemySpawn[i].y, map.EnemyCode[i]);
