@@ -19,7 +19,7 @@ int points;
 static void init(void) {
     nextLevelButton = button_create(SCREEN_W / 2 - 150, 650, 300, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
     for (int i = 0; i < statCount; i++) {
-        addStatButtons[i] = button_create(500, 50 + 100 * i, 100, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
+        addStatButtons[i] = button_create(500, 50 + 100 * i, 150, 100, "Assets/UI_Button.png", "Assets/UI_Button_hovered.png");
     }
     font = al_load_font("Assets/YouDiedFont.otf", 40, 0);
 
@@ -83,7 +83,9 @@ static void draw(void) {
         if (i == 3 && currentStat.speed >= 10) continue;
         if (i == 4 && currentStat.evasion >= 50) continue;
         if (points < prices[i]) continue;
-        draw_button(addStatButtons[i], "+");
+        char buffer[10];
+        sprintf(buffer, "%d", prices[i]);
+        draw_button(addStatButtons[i], buffer);
     }
     draw_button(nextLevelButton, "Next level");
 }
